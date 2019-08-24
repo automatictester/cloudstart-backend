@@ -1,13 +1,11 @@
 package uk.co.automatictester.cloudstart.backend.instances.get;
 
-import java.util.Optional;
-
 public class Instance {
 
     private String instanceId;
     private String instanceType;
     private String state;
-    private Optional<String> name = Optional.empty();
+    private String name;
 
     private Instance(String instanceId, String instanceType, String state) {
         this.instanceId = instanceId;
@@ -27,33 +25,30 @@ public class Instance {
         return state;
     }
 
-    public Optional<String> getName() {
+    public String getName() {
         return name;
     }
 
     @Override
     public String toString() {
-        if (name.isPresent()) {
-            return String.format("instanceId: %s, instanceType: %s, status: %s, name: %s", instanceId, instanceType, state, name);
-        } else {
-            return String.format("instanceId: %s, instanceType: %s, status: %s", instanceId, instanceType, state);
-        }
+        return String.format("instanceId: %s, instanceType: %s, status: %s, name: %s", instanceId, instanceType, state, name);
     }
 
     public static class Builder {
         private String instanceId;
         private String instanceType;
         private String state;
-        private Optional<String> name = Optional.empty();
+        private String name;
 
         public Builder(String instanceId, String instanceType, String state) {
             this.instanceId = instanceId;
             this.instanceType = instanceType;
             this.state = state;
+            this.name = "NAME_NOT_FOUND";
         }
 
         public Instance.Builder withName(String name) {
-            this.name = Optional.of(name);
+            this.name = name;
             return this;
         }
 

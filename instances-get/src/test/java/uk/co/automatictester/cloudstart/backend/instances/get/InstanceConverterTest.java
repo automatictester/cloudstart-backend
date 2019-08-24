@@ -30,7 +30,7 @@ public class InstanceConverterTest {
         assertThat(instance.getInstanceId(), is(equalTo(INSTANCE_ID)));
         assertThat(instance.getInstanceType(), is(equalTo(INSTANCE_TYPE)));
         assertThat(instance.getState(), is(equalTo(STATE)));
-        assertThat(instance.getName(), is(equalTo(Optional.empty())));
+        assertThat(instance.getName(), is(equalTo("NAME_NOT_FOUND")));
     }
 
     @Test
@@ -46,6 +46,6 @@ public class InstanceConverterTest {
         assertThat(instance.getInstanceId(), is(equalTo(INSTANCE_ID)));
         assertThat(instance.getInstanceType(), is(equalTo(INSTANCE_TYPE)));
         assertThat(instance.getState(), is(equalTo(STATE)));
-        assertThat(instance.getName(), is(equalTo(Optional.of(NAME))));
+        assertThat(instance.getName(), is(equalTo(NAME)));
     }
 }

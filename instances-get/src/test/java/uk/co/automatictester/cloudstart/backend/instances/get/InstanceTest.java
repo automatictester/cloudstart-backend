@@ -2,8 +2,6 @@ package uk.co.automatictester.cloudstart.backend.instances.get;
 
 import org.testng.annotations.Test;
 
-import java.util.Optional;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -21,7 +19,7 @@ public class InstanceTest {
         assertThat(instance.getInstanceId(), is(equalTo(INSTANCE_ID)));
         assertThat(instance.getInstanceType(), is(equalTo(INSTANCE_TYPE)));
         assertThat(instance.getState(), is(equalTo(STATE)));
-        assertThat(instance.getName(), is(equalTo(Optional.empty())));
+        assertThat(instance.getName(), is(equalTo("NAME_NOT_FOUND")));
     }
 
     @Test
@@ -30,6 +28,6 @@ public class InstanceTest {
         assertThat(instance.getInstanceId(), is(equalTo(INSTANCE_ID)));
         assertThat(instance.getInstanceType(), is(equalTo(INSTANCE_TYPE)));
         assertThat(instance.getState(), is(equalTo(STATE)));
-        assertThat(instance.getName(), is(equalTo(Optional.of(NAME))));
+        assertThat(instance.getName(), is(equalTo(NAME)));
     }
 }
