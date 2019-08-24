@@ -11,7 +11,7 @@ public class SampleTest {
 
     @Test
     public void getInstancesTest() {
-        final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
+        AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
         DescribeInstancesRequest request = new DescribeInstancesRequest().withMaxResults(1_000);
         DescribeInstancesResult response = ec2.describeInstances(request);
 
