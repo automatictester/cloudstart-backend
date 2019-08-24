@@ -1,2 +1,2 @@
-# cloudstart-backend
-AWS backend for Cloudstart iOS app
+# CloudStart Backend
+AWS backend for [CloudStart iOS app](https://github.com/automatictester/cloudstart)
