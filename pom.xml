@@ -10,6 +10,7 @@
 
    <modules>
       <module>instances-get</module>
+      <module>instances-patch</module>
    </modules>
 
 </project>
