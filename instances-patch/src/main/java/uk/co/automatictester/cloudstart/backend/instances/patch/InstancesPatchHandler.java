@@ -43,6 +43,10 @@ public class InstancesPatchHandler implements RequestHandler<InstancesPatchReque
                         .withInstanceIds(request.getInstanceId());
                 ec2.terminateInstances(terminateInstancesRequest);
                 break;
+            case ("update-dns"):
+                log.info("Updating instance {} DNS entry", request.getInstanceId());
+                DnsManager.updateDnsEntry(request.getInstanceId());
+                break;
         }
 
         InstancesPatchResponse response = new InstancesPatchResponse();
