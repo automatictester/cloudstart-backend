@@ -12,6 +12,18 @@ public class InstanceManager {
     private InstanceManager() {
     }
 
+    public static boolean hasName(String instanceId) {
+        return getDescribeInstanceResult(instanceId)
+                .getReservations()
+                .stream()
+                .flatMap(r -> r.getInstances().stream())
+                .findAny()
+                .get()
+                .getTags()
+                .stream()
+                .anyMatch(t -> t.getKey().equals("Name"));
+    }
+
     public static String getName(String instanceId) {
         String nameTag = getDescribeInstanceResult(instanceId)
                 .getReservations()

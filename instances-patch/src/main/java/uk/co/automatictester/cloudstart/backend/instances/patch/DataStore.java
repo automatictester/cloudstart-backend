@@ -14,11 +14,20 @@ public class DataStore {
     private DataStore() {
     }
 
+    public static boolean hasKey(String key) {
+        GetItemResult getItemResult = getItem(key);
+        return getItemResult.getItem() != null;
+    }
+
     public static String getValue(String key) {
+        GetItemResult getItemResult = getItem(key);
+        return getItemResult.getItem().get("Value").getS();
+    }
+
+    private static GetItemResult getItem(String key) {
         GetItemRequest getItemRequest = new GetItemRequest();
         getItemRequest.setTableName(TABLE_NAME);
         getItemRequest.addKeyEntry("Key", new AttributeValue(key));
-        GetItemResult getItemResult = DDB.getItem(getItemRequest);
-        return getItemResult.getItem().get("Value").getS();
+        return DDB.getItem(getItemRequest);
     }
 }

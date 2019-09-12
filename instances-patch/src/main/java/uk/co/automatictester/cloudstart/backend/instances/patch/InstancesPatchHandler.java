@@ -2,12 +2,10 @@ package uk.co.automatictester.cloudstart.backend.instances.patch;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
-import com.amazonaws.services.ec2.model.RebootInstancesRequest;
-import com.amazonaws.services.ec2.model.StartInstancesRequest;
-import com.amazonaws.services.ec2.model.StopInstancesRequest;
-import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
+import com.amazonaws.services.ec2.model.*;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.amazonaws.waiters.WaiterParameters;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,6 +22,20 @@ public class InstancesPatchHandler implements RequestHandler<InstancesPatchReque
                 StartInstancesRequest startInstancesRequest = new StartInstancesRequest()
                         .withInstanceIds(request.getInstanceId());
                 ec2.startInstances(startInstancesRequest);
+
+                if (InstanceManager.hasName(request.getInstanceId())) {
+                    String instanceName = InstanceManager.getName(request.getInstanceId());
+                    if (DataStore.hasKey(instanceName)) {
+
+                        DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest().withInstanceIds(request.getInstanceId());
+                        ec2.waiters().instanceRunning().run(
+                                new WaiterParameters().withRequest(describeInstancesRequest)
+                        );
+
+                        log.info("Updating instance {} DNS entry", request.getInstanceId());
+                        DnsManager.updateDnsEntry(request.getInstanceId());
+                    }
+                }
                 break;
             case ("stop"):
                 log.info("Stopping instance {}", request.getInstanceId());
@@ -42,10 +54,6 @@ public class InstancesPatchHandler implements RequestHandler<InstancesPatchReque
                 TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest()
                         .withInstanceIds(request.getInstanceId());
                 ec2.terminateInstances(terminateInstancesRequest);
-                break;
-            case ("update-dns"):
-                log.info("Updating instance {} DNS entry", request.getInstanceId());
-                DnsManager.updateDnsEntry(request.getInstanceId());
                 break;
         }
 
