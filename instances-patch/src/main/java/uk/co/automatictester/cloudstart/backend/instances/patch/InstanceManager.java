@@ -12,7 +12,7 @@ public class InstanceManager {
     private InstanceManager() {
     }
 
-    public static boolean hasName(String instanceId) {
+    public static boolean hasNameTag(String instanceId) {
         return getDescribeInstanceResult(instanceId)
                 .getReservations()
                 .stream()
@@ -24,7 +24,7 @@ public class InstanceManager {
                 .anyMatch(t -> t.getKey().equals("Name"));
     }
 
-    public static String getName(String instanceId) {
+    public static String getInstanceName(String instanceId) {
         String nameTag = getDescribeInstanceResult(instanceId)
                 .getReservations()
                 .stream()

@@ -14,12 +14,12 @@ public class DataStore {
     private DataStore() {
     }
 
-    public static boolean hasKey(String key) {
+    public static boolean hasCustomHostnameMapping(String key) {
         GetItemResult getItemResult = getItem(key);
         return getItemResult.getItem() != null;
     }
 
-    public static String getValue(String key) {
+    public static String getValueFromDataStore(String key) {
         GetItemResult getItemResult = getItem(key);
         return getItemResult.getItem().get("Value").getS();
     }
