@@ -7,7 +7,7 @@ import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 
 public class InstanceManager {
 
-    private static final AmazonEC2 EC2 = AmazonEC2ClientBuilder.defaultClient();
+    private static final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
 
     private InstanceManager() {
     }
@@ -53,6 +53,6 @@ public class InstanceManager {
 
     private static DescribeInstancesResult getDescribeInstanceResult(String instanceId) {
         DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceId);
-        return EC2.describeInstances(describeInstancesRequest);
+        return ec2.describeInstances(describeInstancesRequest);
     }
 }

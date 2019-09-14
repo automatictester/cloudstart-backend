@@ -8,8 +8,8 @@ import com.amazonaws.services.dynamodbv2.model.GetItemResult;
 
 public class DataStore {
 
-    private static final AmazonDynamoDB DDB = AmazonDynamoDBClientBuilder.defaultClient();
     private static final String TABLE_NAME = "CloudStartStore";
+    private static final AmazonDynamoDB dynamo = AmazonDynamoDBClientBuilder.defaultClient();
 
     private DataStore() {
     }
@@ -28,6 +28,6 @@ public class DataStore {
         GetItemRequest getItemRequest = new GetItemRequest();
         getItemRequest.setTableName(TABLE_NAME);
         getItemRequest.addKeyEntry("Key", new AttributeValue(key));
-        return DDB.getItem(getItemRequest);
+        return dynamo.getItem(getItemRequest);
     }
 }

@@ -10,8 +10,8 @@ import static uk.co.automatictester.cloudstart.backend.instances.patch.InstanceM
 
 public class DnsManager {
 
-    private static final AmazonRoute53 ROUTE_53 = AmazonRoute53ClientBuilder.defaultClient();
     private static final String HOSTED_ZONE_ID = getValueFromDataStore("HOSTED_ZONE_ID");
+    private static final AmazonRoute53 route53 = AmazonRoute53ClientBuilder.defaultClient();
 
     private DnsManager() {
     }
@@ -35,6 +35,6 @@ public class DnsManager {
                 .withHostedZoneId(HOSTED_ZONE_ID)
                 .withChangeBatch(new ChangeBatch().withChanges(change));
 
-        ROUTE_53.changeResourceRecordSets(changeResourceRecordSetsRequest);
+        route53.changeResourceRecordSets(changeResourceRecordSetsRequest);
     }
 }
