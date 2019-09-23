@@ -6,6 +6,9 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.GetItemRequest;
 import com.amazonaws.services.dynamodbv2.model.GetItemResult;
 
+import java.util.Map;
+import java.util.Optional;
+
 public class DataStore {
 
     private static final String TABLE_NAME = "CloudStartStore";
@@ -19,9 +22,14 @@ public class DataStore {
         return getItemResult.getItem() != null;
     }
 
-    public static String getValueFromDataStore(String key) {
+    public static Optional<String> getValueFromDataStore(String key) {
         GetItemResult getItemResult = getItem(key);
-        return getItemResult.getItem().get("Value").getS();
+        Map<String, AttributeValue> item = getItemResult.getItem();
+        if (item == null) {
+            return Optional.empty();
+        } else {
+            return Optional.of(item.get("Value").getS());
+        }
     }
 
     private static GetItemResult getItem(String key) {

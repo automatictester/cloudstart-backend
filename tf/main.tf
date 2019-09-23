@@ -188,8 +188,8 @@ resource "aws_lambda_function" "instances_get" {
   s3_key                         = "${aws_s3_bucket_object.instances_get_jar.key}"
   source_code_hash               = "${base64sha256(file("${path.module}/../instances-get/target/${var.instances_get_jar_file_name}"))}"
   role                           = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${aws_iam_role.cloudstart_lambda_instances_get.name}"
-  memory_size                    = "512"
-  timeout                        = "300"
+  memory_size                    = "3008"
+  timeout                        = "900"
 }
 
 resource "aws_lambda_function" "instances_patch" {
@@ -200,6 +200,6 @@ resource "aws_lambda_function" "instances_patch" {
   s3_key                         = "${aws_s3_bucket_object.instances_patch_jar.key}"
   source_code_hash               = "${base64sha256(file("${path.module}/../instances-patch/target/${var.instances_patch_jar_file_name}"))}"
   role                           = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${aws_iam_role.cloudstart_lambda_instances_patch.name}"
-  memory_size                    = "512"
-  timeout                        = "60"
+  memory_size                    = "3008"
+  timeout                        = "900"
 }
