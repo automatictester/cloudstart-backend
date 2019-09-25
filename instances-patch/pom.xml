@@ -25,7 +25,7 @@
       <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
       <log4j.version>2.12.1</log4j.version>
       <slf4j.version>1.7.28</slf4j.version>
-      <aws.sdk.version>1.11.637</aws.sdk.version>
+      <aws.sdk.version>1.11.638</aws.sdk.version>
       <failsafe.surefire.version>2.22.2</failsafe.surefire.version>
    </properties>
 
