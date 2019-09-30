@@ -2,3 +2,5 @@ target/
 .idea/
 .terraform/
 *.iml
+*.zip
+main
