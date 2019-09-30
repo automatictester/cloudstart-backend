@@ -2,4 +2,4 @@ os: linux
 dist: trusty
 language: go
 go: "1.13.1"
-script: ./go-get.sh; ./go-build.sh
+script: ./go-build.sh
