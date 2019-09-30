@@ -8,22 +8,22 @@ import (
 )
 
 type Instance struct {
-	InstanceId string `json:"instanceId"`
+	InstanceId   string `json:"instanceId"`
 	InstanceType string `json:"instanceType"`
-	State string `json:"state"`
-	Name string `json:"name"`
+	State        string `json:"state"`
+	Name         string `json:"name"`
 }
 
 type InstancesGetResponse struct {
 	Instances []Instance `json:"instances"`
 }
 
-func handleRequest() (InstancesGetResponse, error) {
-	return InstancesGetResponse{Instances: getInstances()}, nil
-}
-
 func main() {
 	lambda.Start(handleRequest)
+}
+
+func handleRequest() (InstancesGetResponse, error) {
+	return InstancesGetResponse{Instances: getInstances()}, nil
 }
 
 func getInstances() []Instance {
