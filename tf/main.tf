@@ -18,8 +18,8 @@ resource "aws_s3_bucket" "jar" {
 resource "aws_s3_bucket_object" "instances_get_zip" {
   bucket               = "${aws_s3_bucket.jar.bucket}"
   key                  = "${var.instances_get_zip_file_name}"
-  source               = "${path.module}/../instances-get-go/${var.instances_get_zip_file_name}"
-  etag                 = "${md5(file("${path.module}/../instances-get-go/${var.instances_get_zip_file_name}"))}"
+  source               = "${path.module}/../instances-get/${var.instances_get_zip_file_name}"
+  etag                 = "${md5(file("${path.module}/../instances-get/${var.instances_get_zip_file_name}"))}"
 }
 
 resource "aws_s3_bucket_object" "instances_patch_jar" {
@@ -186,7 +186,7 @@ resource "aws_lambda_function" "instances_get" {
   runtime                        = "go1.x"
   s3_bucket                      = "${aws_s3_bucket.jar.bucket}"
   s3_key                         = "${aws_s3_bucket_object.instances_get_zip.key}"
-  source_code_hash               = "${base64sha256(file("${path.module}/../instances-get-go/${var.instances_get_zip_file_name}"))}"
+  source_code_hash               = "${base64sha256(file("${path.module}/../instances-get/${var.instances_get_zip_file_name}"))}"
   role                           = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${aws_iam_role.cloudstart_lambda_instances_get.name}"
   memory_size                    = "1024"
   timeout                        = "900"
