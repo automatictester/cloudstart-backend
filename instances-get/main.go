@@ -49,18 +49,26 @@ func getInstances() []instance {
 }
 
 func toString(instance instance) string {
-	return fmt.Sprintf("instanceId: %s, instanceType: %s, status: %s, name: %s", instance.InstanceID, instance.InstanceType, instance.State, instance.Name)
+	return fmt.Sprintf("instanceId: %s, instanceType: %s, state: %s, name: %s",
+		instance.InstanceID,
+		instance.InstanceType,
+		instance.State,
+		instance.Name)
 }
 
 func convertInstance(ec2instance ec2.Instance) instance {
-	var name = getName(ec2instance.Tags)
-	return instance{*ec2instance.InstanceId, *ec2instance.InstanceType, *ec2instance.State.Name, name}
+	name := getName(ec2instance.Tags)
+	return instance{
+		*ec2instance.InstanceId,
+		*ec2instance.InstanceType,
+		*ec2instance.State.Name,
+		name}
 }
 
 func getName(tags []*ec2.Tag) string {
-	var name = "NAME_NOT_FOUND"
+	name := "NAME_NOT_FOUND"
 	for _, tag := range tags {
-		if *tag.Key == "Name" {
+		if tag.Key != nil && *tag.Key == "Name" && tag.Value != nil && *tag.Value != "" {
 			name = *tag.Value
 		}
 	}
