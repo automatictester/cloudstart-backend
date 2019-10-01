@@ -3,3 +3,4 @@ dist: trusty
 language: go
 go: "1.13.1"
 script: ./go-build.sh
+after_script: curl -d "repo=github.com/automatictester/cloudstart-backend" https://goreportcard.com/checks

@@ -7,26 +7,26 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-type Instance struct {
-	InstanceId   string `json:"instanceId"`
+type instance struct {
+	InstanceID   string `json:"instanceId"`
 	InstanceType string `json:"instanceType"`
 	State        string `json:"state"`
 	Name         string `json:"name"`
 }
 
-type InstancesGetResponse struct {
-	Instances []Instance `json:"instances"`
+type instancesGetResponse struct {
+	Instances []instance `json:"instances"`
 }
 
 func main() {
 	lambda.Start(handleRequest)
 }
 
-func handleRequest() (InstancesGetResponse, error) {
-	return InstancesGetResponse{Instances: getInstances()}, nil
+func handleRequest() (instancesGetResponse, error) {
+	return instancesGetResponse{getInstances()}, nil
 }
 
-func getInstances() []Instance {
+func getInstances() []instance {
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
@@ -37,7 +37,7 @@ func getInstances() []Instance {
 		panic(err.Error())
 	}
 
-	var instances []Instance
+	var instances []instance
 	for _, reservation := range result.Reservations {
 		for _, instance := range reservation.Instances {
 			i := convertInstance(*instance)
@@ -48,13 +48,13 @@ func getInstances() []Instance {
 	return instances
 }
 
-func toString(instance Instance) string {
-	return fmt.Sprintf("instanceId: %s, instanceType: %s, status: %s, name: %s", instance.InstanceId, instance.InstanceType, instance.State, instance.Name)
+func toString(instance instance) string {
+	return fmt.Sprintf("instanceId: %s, instanceType: %s, status: %s, name: %s", instance.InstanceID, instance.InstanceType, instance.State, instance.Name)
 }
 
-func convertInstance(instance ec2.Instance) Instance {
-	var name = getName(instance.Tags)
-	return Instance{*instance.InstanceId, *instance.InstanceType, *instance.State.Name, name}
+func convertInstance(ec2instance ec2.Instance) instance {
+	var name = getName(ec2instance.Tags)
+	return instance{*ec2instance.InstanceId, *ec2instance.InstanceType, *ec2instance.State.Name, name}
 }
 
 func getName(tags []*ec2.Tag) string {
