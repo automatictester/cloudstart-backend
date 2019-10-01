@@ -84,7 +84,7 @@ func TestGetNameTagNoValue(t *testing.T) {
 
 	tags := []*ec2.Tag{
 		{
-			Key:   aws.String("Name"),
+			Key: aws.String("Name"),
 		},
 	}
 
