@@ -58,12 +58,12 @@ func (i instance) String() string {
 		i.Name)
 }
 
-func newInstance(ec2instance ec2Instance) instance {
-	name := ec2instance.getName()
+func newInstance(i ec2Instance) instance {
+	name := i.getName()
 	return instance{
-		*ec2instance.InstanceId,
-		*ec2instance.InstanceType,
-		*ec2instance.State.Name,
+		*i.InstanceId,
+		*i.InstanceType,
+		*i.State.Name,
 		name}
 }
 
