@@ -26,9 +26,9 @@ public class InstancesPatchHandler implements RequestHandler<InstancesPatchReque
             switch (action) {
                 case ("start"):
                     startInstance(instanceId);
+                    waitForInstanceRunning(instanceId);
                     if (hasNameTag(instanceId)) {
                         String instanceName = getInstanceName(instanceId);
-                        waitForInstanceRunning(instanceId);
                         if (hasCustomHostnameMapping(instanceName)) {
                             updateDnsEntry(instanceId);
                         }
