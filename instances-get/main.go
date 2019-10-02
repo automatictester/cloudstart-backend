@@ -18,6 +18,8 @@ type instancesGetResponse struct {
 	Instances []instance `json:"instances"`
 }
 
+type ec2Instance ec2.Instance
+
 func main() {
 	lambda.Start(handleRequest)
 }
@@ -40,24 +42,24 @@ func getInstances() []instance {
 	var instances []instance
 	for _, reservation := range result.Reservations {
 		for _, instance := range reservation.Instances {
-			i := convertInstance(*instance)
+			i := newInstance(ec2Instance(*instance))
 			instances = append(instances, i)
-			fmt.Printf("%s\n", toString(i))
+			fmt.Println(i)
 		}
 	}
 	return instances
 }
 
-func toString(instance instance) string {
+func (i instance) String() string {
 	return fmt.Sprintf("instanceId: %s, instanceType: %s, state: %s, name: %s",
-		instance.InstanceID,
-		instance.InstanceType,
-		instance.State,
-		instance.Name)
+		i.InstanceID,
+		i.InstanceType,
+		i.State,
+		i.Name)
 }
 
-func convertInstance(ec2instance ec2.Instance) instance {
-	name := getName(ec2instance.Tags)
+func newInstance(ec2instance ec2Instance) instance {
+	name := ec2instance.getName()
 	return instance{
 		*ec2instance.InstanceId,
 		*ec2instance.InstanceType,
@@ -65,9 +67,9 @@ func convertInstance(ec2instance ec2.Instance) instance {
 		name}
 }
 
-func getName(tags []*ec2.Tag) string {
+func (i ec2Instance) getName() string {
 	name := "NAME_NOT_FOUND"
-	for _, tag := range tags {
+	for _, tag := range i.Tags {
 		if tag.Key != nil && *tag.Key == "Name" && tag.Value != nil && *tag.Value != "" {
 			name = *tag.Value
 		}
