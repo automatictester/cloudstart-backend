@@ -48,66 +48,50 @@ func TestConvertInstance(t *testing.T) {
 	}
 }
 
+var nameTests = []struct {
+	tag          []*ec2.Tag
+	instanceName string
+}{
+	{
+		[]*ec2.Tag{
+			{
+				Key:   aws.String("Name"),
+				Value: aws.String("My Instance"),
+			},
+		},
+		"My Instance",
+	},
+	{
+		[]*ec2.Tag{
+			{},
+		},
+		"NAME_NOT_FOUND",
+	},
+	{
+		[]*ec2.Tag{
+			{
+				Key: aws.String("Name"),
+			},
+		},
+		"NAME_NOT_FOUND",
+	},
+	{
+		[]*ec2.Tag{
+			{
+				Key:   aws.String("Name"),
+				Value: aws.String(""),
+			},
+		},
+		"NAME_NOT_FOUND",
+	},
+}
+
 func TestGetName(t *testing.T) {
-	exp := "My Instance"
-
-	tags := []*ec2.Tag{
-		{
-			Key:   aws.String("Name"),
-			Value: aws.String("My Instance"),
-		},
-	}
-
-	got := getName(tags)
-
-	if got != exp {
-		t.Errorf("\nexp: %s\ngot: %s", exp, got)
-	}
-}
-
-func TestGetNameNoTag(t *testing.T) {
-	exp := "NAME_NOT_FOUND"
-
-	tags := []*ec2.Tag{
-		{},
-	}
-
-	got := getName(tags)
-
-	if got != exp {
-		t.Errorf("\nexp: %s\ngot: %s", exp, got)
-	}
-}
-
-func TestGetNameTagNoValue(t *testing.T) {
-	exp := "NAME_NOT_FOUND"
-
-	tags := []*ec2.Tag{
-		{
-			Key: aws.String("Name"),
-		},
-	}
-
-	got := getName(tags)
-
-	if got != exp {
-		t.Errorf("\nexp: %s\ngot: %s", exp, got)
-	}
-}
-
-func TestGetNameTagEmptyValue(t *testing.T) {
-	exp := "NAME_NOT_FOUND"
-
-	tags := []*ec2.Tag{
-		{
-			Key:   aws.String("Name"),
-			Value: aws.String(""),
-		},
-	}
-
-	got := getName(tags)
-
-	if got != exp {
-		t.Errorf("\nexp: %s\ngot: %s", exp, got)
+	for _, testDataItem := range nameTests {
+		got := getName(testDataItem.tag)
+		exp := testDataItem.instanceName
+		if got != exp {
+			t.Errorf("\nexp: %s\ngot: %s", exp, got)
+		}
 	}
 }
