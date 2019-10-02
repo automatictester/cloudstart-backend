@@ -59,12 +59,11 @@ func (i instance) String() string {
 }
 
 func newInstance(i ec2Instance) instance {
-	name := i.getName()
 	return instance{
 		*i.InstanceId,
 		*i.InstanceType,
 		*i.State.Name,
-		name}
+		i.getName()}
 }
 
 func (i ec2Instance) getName() string {
