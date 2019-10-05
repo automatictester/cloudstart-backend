@@ -7,12 +7,16 @@ import (
 	"github.com/aws/aws-sdk-go/service/route53"
 )
 
-func updateDNSEntry(instanceID string) {
-	fmt.Println("Updating instance " + instanceID + " DNS entry")
+func getRoute53() *route53.Route53 {
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
-	svc := route53.New(sess)
+	return route53.New(sess)
+}
+
+func updateDNSEntry(instanceID string) {
+	fmt.Println("Updating instance " + instanceID + " DNS entry")
+	svc := getRoute53()
 
 	publicIPAddress, _ := getPublicIPAddress(instanceID)
 	instanceName, _ := getInstanceName(instanceID)

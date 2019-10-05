@@ -16,6 +16,13 @@ type cloudStartStoreItem struct {
 
 const dynamoDbTable = "CloudStartStore"
 
+func getDynamoDB() *dynamodb.DynamoDB {
+	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	}))
+	return dynamodb.New(sess)
+}
+
 func hasCustomHostnameMapping(key string) bool {
 	item, err := getItem(key)
 	if err != nil {
@@ -28,10 +35,7 @@ func hasCustomHostnameMapping(key string) bool {
 }
 
 func getItem(key string) (string, error) {
-	sess := session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
-	svc := dynamodb.New(sess)
+	svc := getDynamoDB()
 
 	result, err := svc.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(dynamoDbTable),

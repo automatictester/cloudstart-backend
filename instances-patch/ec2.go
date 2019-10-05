@@ -8,76 +8,68 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-func startInstance(instanceID string) {
-	fmt.Println("Starting instance " + instanceID)
+func getEC2() *ec2.EC2 {
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
-	svc := ec2.New(sess)
+	return ec2.New(sess)
+}
 
-	startInstancesInput := &ec2.StartInstancesInput{
+func startInstance(instanceID string) {
+	fmt.Println("Starting instance " + instanceID)
+	svc := getEC2()
+
+	input := &ec2.StartInstancesInput{
 		InstanceIds: []*string{
 			aws.String(instanceID),
 		},
 	}
 
-	_, _ = svc.StartInstances(startInstancesInput)
+	_, _ = svc.StartInstances(input)
 }
 
 func stopInstance(instanceID string) {
 	fmt.Println("Stopping instance " + instanceID)
-	sess := session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
-	svc := ec2.New(sess)
+	svc := getEC2()
 
-	stopInstancesInput := &ec2.StopInstancesInput{
+	input := &ec2.StopInstancesInput{
 		InstanceIds: []*string{
 			aws.String(instanceID),
 		},
 	}
 
-	_, _ = svc.StopInstances(stopInstancesInput)
+	_, _ = svc.StopInstances(input)
 }
 
 func rebootInstance(instanceID string) {
 	fmt.Println("Rebooting instance " + instanceID)
-	sess := session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
-	svc := ec2.New(sess)
+	svc := getEC2()
 
-	rebootInstancesInput := &ec2.RebootInstancesInput{
+	input := &ec2.RebootInstancesInput{
 		InstanceIds: []*string{
 			aws.String(instanceID),
 		},
 	}
 
-	_, _ = svc.RebootInstances(rebootInstancesInput)
+	_, _ = svc.RebootInstances(input)
 }
 
 func terminateInstance(instanceID string) {
 	fmt.Println("Terminating instance " + instanceID)
-	sess := session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
-	svc := ec2.New(sess)
+	svc := getEC2()
 
-	terminateInstancesInput := &ec2.TerminateInstancesInput{
+	input := &ec2.TerminateInstancesInput{
 		InstanceIds: []*string{
 			aws.String(instanceID),
 		},
 	}
 
-	_, _ = svc.TerminateInstances(terminateInstancesInput)
+	_, _ = svc.TerminateInstances(input)
 }
 
 func waitUntilInstanceRunning(instanceID string) {
 	fmt.Println("Waiting for instance " + instanceID)
-	sess := session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
-	svc := ec2.New(sess)
+	svc := getEC2()
 
 	input := &ec2.DescribeInstancesInput{
 		InstanceIds: []*string{
@@ -90,10 +82,7 @@ func waitUntilInstanceRunning(instanceID string) {
 
 func waitUntilInstanceStopped(instanceID string) {
 	fmt.Println("Waiting for instance " + instanceID)
-	sess := session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
-	svc := ec2.New(sess)
+	svc := getEC2()
 
 	input := &ec2.DescribeInstancesInput{
 		InstanceIds: []*string{
@@ -106,10 +95,7 @@ func waitUntilInstanceStopped(instanceID string) {
 
 func waitUntilInstanceTerminated(instanceID string) {
 	fmt.Println("Waiting for instance " + instanceID)
-	sess := session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
-	svc := ec2.New(sess)
+	svc := getEC2()
 
 	input := &ec2.DescribeInstancesInput{
 		InstanceIds: []*string{
@@ -121,10 +107,7 @@ func waitUntilInstanceTerminated(instanceID string) {
 }
 
 func getInstanceName(instanceID string) (string, error) {
-	sess := session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
-	svc := ec2.New(sess)
+	svc := getEC2()
 
 	input := &ec2.DescribeInstancesInput{
 		InstanceIds: []*string{
@@ -151,10 +134,7 @@ func getInstanceName(instanceID string) (string, error) {
 }
 
 func getPublicIPAddress(instanceID string) (string, error) {
-	sess := session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
-	svc := ec2.New(sess)
+	svc := getEC2()
 
 	input := &ec2.DescribeInstancesInput{
 		InstanceIds: []*string{
