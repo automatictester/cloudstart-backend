@@ -1,4 +1,4 @@
-module instances-patch-go
+module instances-patch
 
 go 1.13
 
