@@ -18,7 +18,7 @@ func main() {
 	lambda.Start(handleRequest)
 }
 
-func handleRequest(request instancesPatchResponse) (instancesPatchResponse, error) {
+func handleRequest(request instancesPatchRequest) (instancesPatchResponse, error) {
 	instanceID := request.InstanceID
 	action := request.Action
 
