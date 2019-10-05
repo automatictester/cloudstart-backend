@@ -10,23 +10,23 @@ provider "aws" {
   region               = "eu-west-2"
 }
 
-resource "aws_s3_bucket" "jar" {
-  bucket               = "${var.s3_bucket_jar}"
+resource "aws_s3_bucket" "zip" {
+  bucket               = "${var.s3_bucket_zip}"
   acl                  = "private"
 }
 
 resource "aws_s3_bucket_object" "instances_get_zip" {
-  bucket               = "${aws_s3_bucket.jar.bucket}"
+  bucket               = "${aws_s3_bucket.zip.bucket}"
   key                  = "${var.instances_get_zip_file_name}"
   source               = "${path.module}/../instances-get/${var.instances_get_zip_file_name}"
   etag                 = "${md5(file("${path.module}/../instances-get/${var.instances_get_zip_file_name}"))}"
 }
 
-resource "aws_s3_bucket_object" "instances_patch_jar" {
-  bucket               = "${aws_s3_bucket.jar.bucket}"
-  key                  = "${var.instances_patch_jar_file_name}"
-  source               = "${path.module}/../instances-patch/target/${var.instances_patch_jar_file_name}"
-  etag                 = "${md5(file("${path.module}/../instances-patch/target/${var.instances_patch_jar_file_name}"))}"
+resource "aws_s3_bucket_object" "instances_patch_zip" {
+  bucket               = "${aws_s3_bucket.zip.bucket}"
+  key                  = "${var.instances_patch_zip_file_name}"
+  source               = "${path.module}/../instances-patch/${var.instances_patch_zip_file_name}"
+  etag                 = "${md5(file("${path.module}/../instances-patch/${var.instances_patch_zip_file_name}"))}"
 }
 
 resource "aws_iam_role" "cloudstart_lambda_instances_get" {
@@ -184,7 +184,7 @@ resource "aws_lambda_function" "instances_get" {
   function_name                  = "instancesGet"
   handler                        = "main"
   runtime                        = "go1.x"
-  s3_bucket                      = "${aws_s3_bucket.jar.bucket}"
+  s3_bucket                      = "${aws_s3_bucket.zip.bucket}"
   s3_key                         = "${aws_s3_bucket_object.instances_get_zip.key}"
   source_code_hash               = "${base64sha256(file("${path.module}/../instances-get/${var.instances_get_zip_file_name}"))}"
   role                           = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${aws_iam_role.cloudstart_lambda_instances_get.name}"
@@ -194,12 +194,12 @@ resource "aws_lambda_function" "instances_get" {
 
 resource "aws_lambda_function" "instances_patch" {
   function_name                  = "instancesPatch"
-  handler                        = "uk.co.automatictester.cloudstart.backend.instances.patch.InstancesPatchHandler::handleRequest"
-  runtime                        = "java8"
-  s3_bucket                      = "${aws_s3_bucket.jar.bucket}"
-  s3_key                         = "${aws_s3_bucket_object.instances_patch_jar.key}"
-  source_code_hash               = "${base64sha256(file("${path.module}/../instances-patch/target/${var.instances_patch_jar_file_name}"))}"
+  handler                        = "main"
+  runtime                        = "go1.x"
+  s3_bucket                      = "${aws_s3_bucket.zip.bucket}"
+  s3_key                         = "${aws_s3_bucket_object.instances_patch_zip.key}"
+  source_code_hash               = "${base64sha256(file("${path.module}/../instances-patch/${var.instances_patch_zip_file_name}"))}"
   role                           = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${aws_iam_role.cloudstart_lambda_instances_patch.name}"
-  memory_size                    = "3008"
+  memory_size                    = "1024"
   timeout                        = "900"
 }
