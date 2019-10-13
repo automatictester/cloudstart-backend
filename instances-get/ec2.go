@@ -6,17 +6,18 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-func getEC2() *ec2.EC2 {
+var EC2 *ec2.EC2;
+
+func init() {
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
-	return ec2.New(sess)
+	EC2 = ec2.New(sess)
 }
 
 func getInstances() []instance {
-	svc := getEC2()
 
-	result, err := svc.DescribeInstances(nil)
+	result, err := EC2.DescribeInstances(nil)
 	if err != nil {
 		panic(err.Error())
 	}

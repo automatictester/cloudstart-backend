@@ -8,16 +8,17 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-func getEC2() *ec2.EC2 {
+var EC2 *ec2.EC2;
+
+func init() {
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
-	return ec2.New(sess)
+	EC2 = ec2.New(sess)
 }
 
 func startInstance(instanceID string) {
 	fmt.Println("Starting instance " + instanceID)
-	svc := getEC2()
 
 	input := &ec2.StartInstancesInput{
 		InstanceIds: []*string{
@@ -25,12 +26,11 @@ func startInstance(instanceID string) {
 		},
 	}
 
-	_, _ = svc.StartInstances(input)
+	_, _ = EC2.StartInstances(input)
 }
 
 func stopInstance(instanceID string) {
 	fmt.Println("Stopping instance " + instanceID)
-	svc := getEC2()
 
 	input := &ec2.StopInstancesInput{
 		InstanceIds: []*string{
@@ -38,12 +38,11 @@ func stopInstance(instanceID string) {
 		},
 	}
 
-	_, _ = svc.StopInstances(input)
+	_, _ = EC2.StopInstances(input)
 }
 
 func rebootInstance(instanceID string) {
 	fmt.Println("Rebooting instance " + instanceID)
-	svc := getEC2()
 
 	input := &ec2.RebootInstancesInput{
 		InstanceIds: []*string{
@@ -51,12 +50,11 @@ func rebootInstance(instanceID string) {
 		},
 	}
 
-	_, _ = svc.RebootInstances(input)
+	_, _ = EC2.RebootInstances(input)
 }
 
 func terminateInstance(instanceID string) {
 	fmt.Println("Terminating instance " + instanceID)
-	svc := getEC2()
 
 	input := &ec2.TerminateInstancesInput{
 		InstanceIds: []*string{
@@ -64,12 +62,11 @@ func terminateInstance(instanceID string) {
 		},
 	}
 
-	_, _ = svc.TerminateInstances(input)
+	_, _ = EC2.TerminateInstances(input)
 }
 
 func waitUntilInstanceRunning(instanceID string) {
 	fmt.Println("Waiting for instance " + instanceID)
-	svc := getEC2()
 
 	input := &ec2.DescribeInstancesInput{
 		InstanceIds: []*string{
@@ -77,12 +74,11 @@ func waitUntilInstanceRunning(instanceID string) {
 		},
 	}
 
-	_ = svc.WaitUntilInstanceRunning(input)
+	_ = EC2.WaitUntilInstanceRunning(input)
 }
 
 func waitUntilInstanceStopped(instanceID string) {
 	fmt.Println("Waiting for instance " + instanceID)
-	svc := getEC2()
 
 	input := &ec2.DescribeInstancesInput{
 		InstanceIds: []*string{
@@ -90,12 +86,11 @@ func waitUntilInstanceStopped(instanceID string) {
 		},
 	}
 
-	_ = svc.WaitUntilInstanceStopped(input)
+	_ = EC2.WaitUntilInstanceStopped(input)
 }
 
 func waitUntilInstanceTerminated(instanceID string) {
 	fmt.Println("Waiting for instance " + instanceID)
-	svc := getEC2()
 
 	input := &ec2.DescribeInstancesInput{
 		InstanceIds: []*string{
@@ -103,11 +98,10 @@ func waitUntilInstanceTerminated(instanceID string) {
 		},
 	}
 
-	_ = svc.WaitUntilInstanceTerminated(input)
+	_ = EC2.WaitUntilInstanceTerminated(input)
 }
 
 func getInstanceName(instanceID string) (string, error) {
-	svc := getEC2()
 
 	input := &ec2.DescribeInstancesInput{
 		InstanceIds: []*string{
@@ -115,7 +109,7 @@ func getInstanceName(instanceID string) (string, error) {
 		},
 	}
 
-	result, err := svc.DescribeInstances(input)
+	result, err := EC2.DescribeInstances(input)
 	if err != nil {
 		return "", err
 	}
@@ -134,7 +128,6 @@ func getInstanceName(instanceID string) (string, error) {
 }
 
 func getPublicIPAddress(instanceID string) (string, error) {
-	svc := getEC2()
 
 	input := &ec2.DescribeInstancesInput{
 		InstanceIds: []*string{
@@ -142,7 +135,7 @@ func getPublicIPAddress(instanceID string) (string, error) {
 		},
 	}
 
-	result, err := svc.DescribeInstances(input)
+	result, err := EC2.DescribeInstances(input)
 	if err != nil {
 		return "", err
 	}

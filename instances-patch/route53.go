@@ -7,16 +7,17 @@ import (
 	"github.com/aws/aws-sdk-go/service/route53"
 )
 
-func getRoute53() *route53.Route53 {
+var ROUTE53 *route53.Route53
+
+func init() {
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
-	return route53.New(sess)
+	ROUTE53 = route53.New(sess)
 }
 
 func updateDNSEntry(instanceID string) {
 	fmt.Println("Updating instance " + instanceID + " DNS entry")
-	svc := getRoute53()
 
 	publicIPAddress, _ := getPublicIPAddress(instanceID)
 	instanceName, _ := getInstanceName(instanceID)
@@ -52,7 +53,7 @@ func updateDNSEntry(instanceID string) {
 		ChangeBatch:  changeBatch,
 	}
 
-	_, err := svc.ChangeResourceRecordSets(changeResourceRecordSetsInput)
+	_, err := ROUTE53.ChangeResourceRecordSets(changeResourceRecordSetsInput)
 	if err != nil {
 		fmt.Println(err.Error())
 		return

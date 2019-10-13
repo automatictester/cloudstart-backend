@@ -14,13 +14,15 @@ type cloudStartStoreItem struct {
 	Value string
 }
 
-const dynamoDbTable = "CloudStartStore"
+const dynamoDBTable = "CloudStartStore"
 
-func getDynamoDB() *dynamodb.DynamoDB {
+var DDB *dynamodb.DynamoDB
+
+func init() {
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
-	return dynamodb.New(sess)
+	DDB = dynamodb.New(sess)
 }
 
 func hasCustomHostnameMapping(key string) bool {
@@ -35,10 +37,8 @@ func hasCustomHostnameMapping(key string) bool {
 }
 
 func getItem(key string) (string, error) {
-	svc := getDynamoDB()
-
-	result, err := svc.GetItem(&dynamodb.GetItemInput{
-		TableName: aws.String(dynamoDbTable),
+	result, err := DDB.GetItem(&dynamodb.GetItemInput{
+		TableName: aws.String(dynamoDBTable),
 		Key: map[string]*dynamodb.AttributeValue{
 			"Key": {
 				S: aws.String(key),
@@ -51,8 +51,7 @@ func getItem(key string) (string, error) {
 	}
 
 	item := cloudStartStoreItem{}
-	err = dynamodbattribute.UnmarshalMap(result.Item, &item)
-	if err != nil {
+	if err = dynamodbattribute.UnmarshalMap(result.Item, &item); err != nil {
 		fmt.Println(err.Error())
 		return "", err
 	}
