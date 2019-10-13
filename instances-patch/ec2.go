@@ -8,13 +8,13 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-var EC2 *ec2.EC2;
+var ec2Svc *ec2.EC2
 
 func init() {
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
-	EC2 = ec2.New(sess)
+	ec2Svc = ec2.New(sess)
 }
 
 func startInstance(instanceID string) {
@@ -26,7 +26,7 @@ func startInstance(instanceID string) {
 		},
 	}
 
-	_, _ = EC2.StartInstances(input)
+	_, _ = ec2Svc.StartInstances(input)
 }
 
 func stopInstance(instanceID string) {
@@ -38,7 +38,7 @@ func stopInstance(instanceID string) {
 		},
 	}
 
-	_, _ = EC2.StopInstances(input)
+	_, _ = ec2Svc.StopInstances(input)
 }
 
 func rebootInstance(instanceID string) {
@@ -50,7 +50,7 @@ func rebootInstance(instanceID string) {
 		},
 	}
 
-	_, _ = EC2.RebootInstances(input)
+	_, _ = ec2Svc.RebootInstances(input)
 }
 
 func terminateInstance(instanceID string) {
@@ -62,7 +62,7 @@ func terminateInstance(instanceID string) {
 		},
 	}
 
-	_, _ = EC2.TerminateInstances(input)
+	_, _ = ec2Svc.TerminateInstances(input)
 }
 
 func waitUntilInstanceRunning(instanceID string) {
@@ -74,7 +74,7 @@ func waitUntilInstanceRunning(instanceID string) {
 		},
 	}
 
-	_ = EC2.WaitUntilInstanceRunning(input)
+	_ = ec2Svc.WaitUntilInstanceRunning(input)
 }
 
 func waitUntilInstanceStopped(instanceID string) {
@@ -86,7 +86,7 @@ func waitUntilInstanceStopped(instanceID string) {
 		},
 	}
 
-	_ = EC2.WaitUntilInstanceStopped(input)
+	_ = ec2Svc.WaitUntilInstanceStopped(input)
 }
 
 func waitUntilInstanceTerminated(instanceID string) {
@@ -98,7 +98,7 @@ func waitUntilInstanceTerminated(instanceID string) {
 		},
 	}
 
-	_ = EC2.WaitUntilInstanceTerminated(input)
+	_ = ec2Svc.WaitUntilInstanceTerminated(input)
 }
 
 func getInstanceName(instanceID string) (string, error) {
@@ -109,7 +109,7 @@ func getInstanceName(instanceID string) (string, error) {
 		},
 	}
 
-	result, err := EC2.DescribeInstances(input)
+	result, err := ec2Svc.DescribeInstances(input)
 	if err != nil {
 		return "", err
 	}
@@ -135,7 +135,7 @@ func getPublicIPAddress(instanceID string) (string, error) {
 		},
 	}
 
-	result, err := EC2.DescribeInstances(input)
+	result, err := ec2Svc.DescribeInstances(input)
 	if err != nil {
 		return "", err
 	}

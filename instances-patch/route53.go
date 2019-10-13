@@ -7,13 +7,13 @@ import (
 	"github.com/aws/aws-sdk-go/service/route53"
 )
 
-var ROUTE53 *route53.Route53
+var route53Svc *route53.Route53
 
 func init() {
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
-	ROUTE53 = route53.New(sess)
+	route53Svc = route53.New(sess)
 }
 
 func updateDNSEntry(instanceID string) {
@@ -53,7 +53,7 @@ func updateDNSEntry(instanceID string) {
 		ChangeBatch:  changeBatch,
 	}
 
-	_, err := ROUTE53.ChangeResourceRecordSets(changeResourceRecordSetsInput)
+	_, err := route53Svc.ChangeResourceRecordSets(changeResourceRecordSetsInput)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
