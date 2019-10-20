@@ -25,8 +25,6 @@ func handleRequest(request instancesPatchRequest) (instancesPatchResponse, error
 	instancesPatchResponse := instancesPatchResponse{
 		InstanceID: instanceID,
 		Action:     action,
-		Status:     "",
-		Message:    "",
 	}
 
 	switch action {
