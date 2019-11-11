@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
@@ -13,5 +15,10 @@ func main() {
 }
 
 func handleRequest() (instancesGetResponse, error) {
-	return instancesGetResponse{getInstances()}, nil
+	instances, err := getInstances()
+	if err != nil {
+		fmt.Println(err.Error())
+		return instancesGetResponse{instances}, errors.New("cannot retrieve list of EC2 instances")
+	}
+	return instancesGetResponse{instances}, nil
 }

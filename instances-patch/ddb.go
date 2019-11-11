@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -25,15 +24,15 @@ func init() {
 	ddb = dynamodb.New(sess)
 }
 
-func hasCustomHostnameMapping(key string) bool {
+func hasCustomHostnameMapping(key string) (bool, error) {
 	item, err := getItem(key)
 	if err != nil {
-		fmt.Println(err.Error())
+		return false, err
 	}
 	if item == "" {
-		return false
+		return false, nil
 	}
-	return true
+	return true, nil
 }
 
 func getItem(key string) (string, error) {
@@ -45,20 +44,17 @@ func getItem(key string) (string, error) {
 			},
 		},
 	})
-
 	if err != nil {
 		return "", err
 	}
 
 	item := cloudStartStoreItem{}
 	if err = dynamodbattribute.UnmarshalMap(result.Item, &item); err != nil {
-		fmt.Println(err.Error())
 		return "", err
 	}
 
 	if item.Value == "" {
-		errorMessage := fmt.Sprintf("No item found for key: %s", key)
-		return "", errors.New(errorMessage)
+		fmt.Printf("No item found for key: %s", key)
 	}
 
 	return item.Value, nil

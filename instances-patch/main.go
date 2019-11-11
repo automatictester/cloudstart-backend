@@ -1,6 +1,9 @@
 package main
 
-import "github.com/aws/aws-lambda-go/lambda"
+import (
+	"fmt"
+	"github.com/aws/aws-lambda-go/lambda"
+)
 
 type instancesPatchRequest struct {
 	InstanceID string `json:"instanceId"`
@@ -19,6 +22,7 @@ func main() {
 }
 
 func handleRequest(request instancesPatchRequest) (instancesPatchResponse, error) {
+	instancesPatchResponseOnError := instancesPatchResponse{}
 	instanceID := request.InstanceID
 	action := request.Action
 
@@ -29,22 +33,63 @@ func handleRequest(request instancesPatchRequest) (instancesPatchResponse, error
 
 	switch action {
 	case "start":
-		startInstance(instanceID)
-		waitUntilInstanceRunning(instanceID)
+		err := startInstance(instanceID)
+		if err != nil {
+			fmt.Println(err.Error())
+			return instancesPatchResponseOnError, fmt.Errorf("cannot start instance %s", instanceID)
+		}
+
+		err = waitUntilInstanceRunning(instanceID)
+		if err != nil {
+			fmt.Println(err.Error())
+			return instancesPatchResponseOnError, fmt.Errorf("instance %s still not running", instanceID)
+		}
+
 		name, err := getInstanceName(instanceID)
 		if err == nil {
-			if hasCustomHostnameMapping(name) {
-				updateDNSEntry(instanceID)
+			hasMapping, err := hasCustomHostnameMapping(name)
+			if err != nil {
+				fmt.Println(err.Error())
+				return instancesPatchResponseOnError, fmt.Errorf("instance %s started but cannot retrieve DNS mapping", instanceID)
+			}
+			if hasMapping {
+				err := updateDNSEntry(instanceID)
+				if err != nil {
+					fmt.Println(err.Error())
+					return instancesPatchResponseOnError, fmt.Errorf("instance %s started but cannot update DNS record", instanceID)
+				}
 			}
 		}
 	case "stop":
-		stopInstance(instanceID)
-		waitUntilInstanceStopped(instanceID)
+		err := stopInstance(instanceID)
+		if err != nil {
+			fmt.Println(err.Error())
+			return instancesPatchResponseOnError, fmt.Errorf("cannot stop instance %s", instanceID)
+		}
+
+		err = waitUntilInstanceStopped(instanceID)
+		if err != nil {
+			fmt.Println(err.Error())
+			return instancesPatchResponseOnError, fmt.Errorf("instance %s still not stopped", instanceID)
+		}
 	case "reboot":
-		rebootInstance(instanceID)
+		err := rebootInstance(instanceID)
+		if err != nil {
+			fmt.Println(err.Error())
+			return instancesPatchResponseOnError, fmt.Errorf("cannot reboot instance %s", instanceID)
+		}
 	case "terminate":
-		terminateInstance(instanceID)
-		waitUntilInstanceTerminated(instanceID)
+		err := terminateInstance(instanceID)
+		if err != nil {
+			fmt.Println(err.Error())
+			return instancesPatchResponseOnError, fmt.Errorf("cannot terminate instance %s", instanceID)
+		}
+
+		err = waitUntilInstanceTerminated(instanceID)
+		if err != nil {
+			fmt.Println(err.Error())
+			return instancesPatchResponseOnError, fmt.Errorf("instance %s still not terminated", instanceID)
+		}
 	}
 
 	return instancesPatchResponse, nil

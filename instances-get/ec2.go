@@ -15,11 +15,10 @@ func init() {
 	ec2Svc = ec2.New(sess)
 }
 
-func getInstances() []instance {
-
+func getInstances() ([]instance, error) {
 	result, err := ec2Svc.DescribeInstances(nil)
 	if err != nil {
-		panic(err.Error())
+		return nil, err
 	}
 
 	var instances []instance
@@ -30,5 +29,5 @@ func getInstances() []instance {
 			fmt.Println(i)
 		}
 	}
-	return instances
+	return instances, nil
 }

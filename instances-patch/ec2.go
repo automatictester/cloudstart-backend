@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -17,7 +16,7 @@ func init() {
 	ec2Svc = ec2.New(sess)
 }
 
-func startInstance(instanceID string) {
+func startInstance(instanceID string) error {
 	fmt.Println("Starting instance " + instanceID)
 
 	input := &ec2.StartInstancesInput{
@@ -26,10 +25,14 @@ func startInstance(instanceID string) {
 		},
 	}
 
-	_, _ = ec2Svc.StartInstances(input)
+	_, err := ec2Svc.StartInstances(input)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func stopInstance(instanceID string) {
+func stopInstance(instanceID string) error {
 	fmt.Println("Stopping instance " + instanceID)
 
 	input := &ec2.StopInstancesInput{
@@ -38,10 +41,14 @@ func stopInstance(instanceID string) {
 		},
 	}
 
-	_, _ = ec2Svc.StopInstances(input)
+	_, err := ec2Svc.StopInstances(input)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func rebootInstance(instanceID string) {
+func rebootInstance(instanceID string) error {
 	fmt.Println("Rebooting instance " + instanceID)
 
 	input := &ec2.RebootInstancesInput{
@@ -50,10 +57,14 @@ func rebootInstance(instanceID string) {
 		},
 	}
 
-	_, _ = ec2Svc.RebootInstances(input)
+	_, err := ec2Svc.RebootInstances(input)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func terminateInstance(instanceID string) {
+func terminateInstance(instanceID string) error {
 	fmt.Println("Terminating instance " + instanceID)
 
 	input := &ec2.TerminateInstancesInput{
@@ -62,10 +73,14 @@ func terminateInstance(instanceID string) {
 		},
 	}
 
-	_, _ = ec2Svc.TerminateInstances(input)
+	_, err := ec2Svc.TerminateInstances(input)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func waitUntilInstanceRunning(instanceID string) {
+func waitUntilInstanceRunning(instanceID string) error {
 	fmt.Println("Waiting for instance " + instanceID)
 
 	input := &ec2.DescribeInstancesInput{
@@ -74,10 +89,14 @@ func waitUntilInstanceRunning(instanceID string) {
 		},
 	}
 
-	_ = ec2Svc.WaitUntilInstanceRunning(input)
+	err := ec2Svc.WaitUntilInstanceRunning(input)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func waitUntilInstanceStopped(instanceID string) {
+func waitUntilInstanceStopped(instanceID string) error {
 	fmt.Println("Waiting for instance " + instanceID)
 
 	input := &ec2.DescribeInstancesInput{
@@ -86,10 +105,14 @@ func waitUntilInstanceStopped(instanceID string) {
 		},
 	}
 
-	_ = ec2Svc.WaitUntilInstanceStopped(input)
+	err := ec2Svc.WaitUntilInstanceStopped(input)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func waitUntilInstanceTerminated(instanceID string) {
+func waitUntilInstanceTerminated(instanceID string) error {
 	fmt.Println("Waiting for instance " + instanceID)
 
 	input := &ec2.DescribeInstancesInput{
@@ -98,7 +121,11 @@ func waitUntilInstanceTerminated(instanceID string) {
 		},
 	}
 
-	_ = ec2Svc.WaitUntilInstanceTerminated(input)
+	err := ec2Svc.WaitUntilInstanceTerminated(input)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func getInstanceName(instanceID string) (string, error) {
@@ -123,8 +150,8 @@ func getInstanceName(instanceID string) (string, error) {
 			}
 		}
 	}
-	errorMessage := fmt.Sprintf("Unable to find Name tag for %s", instanceID)
-	return "", errors.New(errorMessage)
+	err = fmt.Errorf("unable to find Name tag for %s", instanceID)
+	return "", err
 }
 
 func getPublicIPAddress(instanceID string) (string, error) {
@@ -147,6 +174,6 @@ func getPublicIPAddress(instanceID string) (string, error) {
 			}
 		}
 	}
-	errorMessage := fmt.Sprintf("Unable to find public IP address for %s", instanceID)
-	return "", errors.New(errorMessage)
+	err = fmt.Errorf("unable to find public IP address for %s", instanceID)
+	return "", err
 }
