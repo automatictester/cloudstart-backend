@@ -37,74 +37,74 @@ func TestConvertToInstance(t *testing.T) {
 	}
 }
 
-var instanceNameTestData = []struct {
-	ec2Instance          ec2Instance
-	expectedInstanceName string
-}{
-	{
-		ec2Instance(ec2.Instance{
-			InstanceId:   aws.String("instanceId"),
-			InstanceType: aws.String("instanceType"),
-			Tags: []*ec2.Tag{
-				{
-					Key:   aws.String("Name"),
-					Value: aws.String("My Instance"),
-				},
-			},
-			State: &ec2.InstanceState{
-				Name: aws.String("stopped"),
-			},
-		}),
-		"My Instance",
-	},
-	{
-		ec2Instance(ec2.Instance{
-			InstanceId:   aws.String("instanceId"),
-			InstanceType: aws.String("instanceType"),
-			Tags: []*ec2.Tag{
-				{},
-			},
-			State: &ec2.InstanceState{
-				Name: aws.String("stopped"),
-			},
-		}),
-		"NAME_NOT_FOUND",
-	},
-	{
-		ec2Instance(ec2.Instance{
-			InstanceId:   aws.String("instanceId"),
-			InstanceType: aws.String("instanceType"),
-			Tags: []*ec2.Tag{
-				{
-					Key: aws.String("Name"),
-				},
-			},
-			State: &ec2.InstanceState{
-				Name: aws.String("stopped"),
-			},
-		}),
-		"NAME_NOT_FOUND",
-	},
-	{
-		ec2Instance(ec2.Instance{
-			InstanceId:   aws.String("instanceId"),
-			InstanceType: aws.String("instanceType"),
-			Tags: []*ec2.Tag{
-				{
-					Key:   aws.String("Name"),
-					Value: aws.String(""),
-				},
-			},
-			State: &ec2.InstanceState{
-				Name: aws.String("stopped"),
-			},
-		}),
-		"NAME_NOT_FOUND",
-	},
-}
-
 func TestGetName(t *testing.T) {
-	for _, example := range instanceNameTestData {
+	var tests = []struct {
+		ec2Instance          ec2Instance
+		expectedInstanceName string
+	}{
+		{
+			ec2Instance(ec2.Instance{
+				InstanceId:   aws.String("instanceId"),
+				InstanceType: aws.String("instanceType"),
+				Tags: []*ec2.Tag{
+					{
+						Key:   aws.String("Name"),
+						Value: aws.String("My Instance"),
+					},
+				},
+				State: &ec2.InstanceState{
+					Name: aws.String("stopped"),
+				},
+			}),
+			"My Instance",
+		},
+		{
+			ec2Instance(ec2.Instance{
+				InstanceId:   aws.String("instanceId"),
+				InstanceType: aws.String("instanceType"),
+				Tags: []*ec2.Tag{
+					{},
+				},
+				State: &ec2.InstanceState{
+					Name: aws.String("stopped"),
+				},
+			}),
+			"NAME_NOT_FOUND",
+		},
+		{
+			ec2Instance(ec2.Instance{
+				InstanceId:   aws.String("instanceId"),
+				InstanceType: aws.String("instanceType"),
+				Tags: []*ec2.Tag{
+					{
+						Key: aws.String("Name"),
+					},
+				},
+				State: &ec2.InstanceState{
+					Name: aws.String("stopped"),
+				},
+			}),
+			"NAME_NOT_FOUND",
+		},
+		{
+			ec2Instance(ec2.Instance{
+				InstanceId:   aws.String("instanceId"),
+				InstanceType: aws.String("instanceType"),
+				Tags: []*ec2.Tag{
+					{
+						Key:   aws.String("Name"),
+						Value: aws.String(""),
+					},
+				},
+				State: &ec2.InstanceState{
+					Name: aws.String("stopped"),
+				},
+			}),
+			"NAME_NOT_FOUND",
+		},
+	}
+
+	for _, example := range tests {
 		got := example.ec2Instance.getName()
 		exp := example.expectedInstanceName
 		if got != exp {
