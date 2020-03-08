@@ -53,7 +53,7 @@ func handleRequest(request instancesPatchRequest) (instancesPatchResponse, error
 				return instancesPatchResponseOnError, fmt.Errorf("instance %s started but cannot retrieve DNS mapping", instanceID)
 			}
 			if hasMapping {
-				err := updateDNSEntry(instanceID)
+				err := upsertDNSEntry(instanceID)
 				if err != nil {
 					fmt.Println(err.Error())
 					return instancesPatchResponseOnError, fmt.Errorf("instance %s started but cannot update DNS record", instanceID)
@@ -61,10 +61,22 @@ func handleRequest(request instancesPatchRequest) (instancesPatchResponse, error
 			}
 		}
 	case "stop":
-		err := stopInstance(instanceID)
+		publicIPAddress, err := getPublicIPAddress(instanceID)
+		if err != nil {
+			fmt.Println(err.Error())
+			return instancesPatchResponseOnError, fmt.Errorf("error retrieving instance %s public IP address", instanceID)
+		}
+
+		err = stopInstance(instanceID)
 		if err != nil {
 			fmt.Println(err.Error())
 			return instancesPatchResponseOnError, fmt.Errorf("cannot stop instance %s", instanceID)
+		}
+
+		err = deleteDNSEntry(instanceID, publicIPAddress)
+		if err != nil {
+			fmt.Println(err.Error())
+			return instancesPatchResponseOnError, fmt.Errorf("error deleting DNS entry for instance %s", instanceID)
 		}
 
 		err = waitUntilInstanceStopped(instanceID)
@@ -79,10 +91,22 @@ func handleRequest(request instancesPatchRequest) (instancesPatchResponse, error
 			return instancesPatchResponseOnError, fmt.Errorf("cannot reboot instance %s", instanceID)
 		}
 	case "terminate":
-		err := terminateInstance(instanceID)
+		publicIPAddress, err := getPublicIPAddress(instanceID)
+		if err != nil {
+			fmt.Println(err.Error())
+			return instancesPatchResponseOnError, fmt.Errorf("error retrieving instance %s public IP address", instanceID)
+		}
+
+		err = terminateInstance(instanceID)
 		if err != nil {
 			fmt.Println(err.Error())
 			return instancesPatchResponseOnError, fmt.Errorf("cannot terminate instance %s", instanceID)
+		}
+
+		err = deleteDNSEntry(instanceID, publicIPAddress)
+		if err != nil {
+			fmt.Println(err.Error())
+			return instancesPatchResponseOnError, fmt.Errorf("error deleting DNS entry for instance %s", instanceID)
 		}
 
 		err = waitUntilInstanceTerminated(instanceID)

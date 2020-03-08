@@ -16,12 +16,25 @@ func init() {
 	route53Svc = route53.New(sess)
 }
 
-func updateDNSEntry(instanceID string) error {
+func upsertDNSEntry(instanceID string) error {
 	fmt.Println("Updating instance " + instanceID + " DNS entry")
 
 	publicIPAddress, err := getPublicIPAddress(instanceID)
 	if err != nil {
 		return err
+	}
+
+	return updateDNSEntry(instanceID, publicIPAddress, "UPSERT")
+}
+
+func deleteDNSEntry(instanceID string, publicIPAddress string) error {
+	fmt.Println("Deleting instance " + instanceID + " DNS entry")
+	return updateDNSEntry(instanceID, publicIPAddress, "DELETE")
+}
+
+func updateDNSEntry(instanceID string, publicIPAddress string, action string) error {
+	if action != "UPSERT" && action != "DELETE" {
+		return fmt.Errorf("action not in set [UPSERT, DELETE]: %s", action)
 	}
 
 	instanceName, err := getInstanceName(instanceID)
@@ -54,7 +67,7 @@ func updateDNSEntry(instanceID string) error {
 
 	change := []*route53.Change{
 		{
-			Action:            aws.String("UPSERT"),
+			Action:            aws.String(action),
 			ResourceRecordSet: resourceRecordSet,
 		},
 	}
