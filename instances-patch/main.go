@@ -45,9 +45,9 @@ func handleRequest(request instancesPatchRequest) (instancesPatchResponse, error
 			return instancesPatchResponseOnError, fmt.Errorf("instance %s still not running", instanceID)
 		}
 
-		name, err := getInstanceName(instanceID)
+		instanceName, err := getInstanceName(instanceID)
 		if err == nil {
-			hasMapping, err := hasCustomHostnameMapping(name)
+			hasMapping, err := hasCustomHostnameMapping(instanceName)
 			if err != nil {
 				fmt.Println(err.Error())
 				return instancesPatchResponseOnError, fmt.Errorf("instance %s started but cannot retrieve DNS mapping", instanceID)
@@ -61,22 +61,34 @@ func handleRequest(request instancesPatchRequest) (instancesPatchResponse, error
 			}
 		}
 	case "stop":
-		publicIPAddress, err := getPublicIPAddress(instanceID)
-		if err != nil {
-			fmt.Println(err.Error())
-			return instancesPatchResponseOnError, fmt.Errorf("error retrieving instance %s public IP address", instanceID)
-		}
-
-		err = stopInstance(instanceID)
+		err := stopInstance(instanceID)
 		if err != nil {
 			fmt.Println(err.Error())
 			return instancesPatchResponseOnError, fmt.Errorf("cannot stop instance %s", instanceID)
 		}
 
-		err = deleteDNSEntry(instanceID, publicIPAddress)
-		if err != nil {
-			fmt.Println(err.Error())
-			return instancesPatchResponseOnError, fmt.Errorf("error deleting DNS entry for instance %s", instanceID)
+		instanceName, err := getInstanceName(instanceID)
+		if err == nil {
+
+			hasMapping, err := hasCustomHostnameMapping(instanceName)
+			if err != nil {
+				fmt.Println(err.Error())
+				return instancesPatchResponseOnError, fmt.Errorf("error retrieving DNS mapping for instance %s", instanceID)
+			}
+
+			if hasMapping {
+				err = upsertFakeDNSEntry(instanceID)
+				if err != nil {
+					fmt.Println(err.Error())
+					return instancesPatchResponseOnError, fmt.Errorf("error upserting fake DNS entry for instance %s", instanceID)
+				}
+
+				err = deleteFakeDNSEntry(instanceID)
+				if err != nil {
+					fmt.Println(err.Error())
+					return instancesPatchResponseOnError, fmt.Errorf("error deleting fake DNS entry for instance %s", instanceID)
+				}
+			}
 		}
 
 		err = waitUntilInstanceStopped(instanceID)
@@ -91,22 +103,34 @@ func handleRequest(request instancesPatchRequest) (instancesPatchResponse, error
 			return instancesPatchResponseOnError, fmt.Errorf("cannot reboot instance %s", instanceID)
 		}
 	case "terminate":
-		publicIPAddress, err := getPublicIPAddress(instanceID)
-		if err != nil {
-			fmt.Println(err.Error())
-			return instancesPatchResponseOnError, fmt.Errorf("error retrieving instance %s public IP address", instanceID)
-		}
-
-		err = terminateInstance(instanceID)
+		err := terminateInstance(instanceID)
 		if err != nil {
 			fmt.Println(err.Error())
 			return instancesPatchResponseOnError, fmt.Errorf("cannot terminate instance %s", instanceID)
 		}
 
-		err = deleteDNSEntry(instanceID, publicIPAddress)
-		if err != nil {
-			fmt.Println(err.Error())
-			return instancesPatchResponseOnError, fmt.Errorf("error deleting DNS entry for instance %s", instanceID)
+		instanceName, err := getInstanceName(instanceID)
+		if err == nil {
+
+			hasMapping, err := hasCustomHostnameMapping(instanceName)
+			if err != nil {
+				fmt.Println(err.Error())
+				return instancesPatchResponseOnError, fmt.Errorf("error retrieving DNS mapping for instance %s", instanceID)
+			}
+
+			if hasMapping {
+				err = upsertFakeDNSEntry(instanceID)
+				if err != nil {
+					fmt.Println(err.Error())
+					return instancesPatchResponseOnError, fmt.Errorf("error upserting fake DNS entry for instance %s", instanceID)
+				}
+
+				err = deleteFakeDNSEntry(instanceID)
+				if err != nil {
+					fmt.Println(err.Error())
+					return instancesPatchResponseOnError, fmt.Errorf("error deleting fake DNS entry for instance %s", instanceID)
+				}
+			}
 		}
 
 		err = waitUntilInstanceTerminated(instanceID)

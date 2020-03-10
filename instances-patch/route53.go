@@ -8,6 +8,7 @@ import (
 )
 
 var route53Svc *route53.Route53
+var fakeIPAddress = "192.168.0.1"
 
 func init() {
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
@@ -17,7 +18,7 @@ func init() {
 }
 
 func upsertDNSEntry(instanceID string) error {
-	fmt.Println("Updating instance " + instanceID + " DNS entry")
+	fmt.Println("Upserting instance " + instanceID + " DNS entry")
 
 	publicIPAddress, err := getPublicIPAddress(instanceID)
 	if err != nil {
@@ -27,9 +28,14 @@ func upsertDNSEntry(instanceID string) error {
 	return updateDNSEntry(instanceID, publicIPAddress, "UPSERT")
 }
 
-func deleteDNSEntry(instanceID string, publicIPAddress string) error {
-	fmt.Println("Deleting instance " + instanceID + " DNS entry")
-	return updateDNSEntry(instanceID, publicIPAddress, "DELETE")
+func upsertFakeDNSEntry(instanceID string) error {
+	fmt.Println("Upserting instance " + instanceID + " fake DNS entry")
+	return updateDNSEntry(instanceID, fakeIPAddress, "UPSERT")
+}
+
+func deleteFakeDNSEntry(instanceID string) error {
+	fmt.Println("Deleting instance " + instanceID + " fake DNS entry")
+	return updateDNSEntry(instanceID, fakeIPAddress, "DELETE")
 }
 
 func updateDNSEntry(instanceID string, publicIPAddress string, action string) error {
@@ -42,12 +48,12 @@ func updateDNSEntry(instanceID string, publicIPAddress string, action string) er
 		return err
 	}
 
-	instanceDNSName, err := getItem(instanceName)
+	instanceDNSName, err := getCustomDNSMapping(instanceName)
 	if err != nil {
 		return err
 	}
 
-	hostedZoneID, err := getItem("HOSTED_ZONE_ID")
+	hostedZoneID, err := getCustomDNSMapping("HOSTED_ZONE_ID")
 	if err != nil {
 		return err
 	}

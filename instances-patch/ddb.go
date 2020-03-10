@@ -24,8 +24,8 @@ func init() {
 	ddb = dynamodb.New(sess)
 }
 
-func hasCustomHostnameMapping(key string) (bool, error) {
-	item, err := getItem(key)
+func hasCustomHostnameMapping(instanceName string) (bool, error) {
+	item, err := getCustomDNSMapping(instanceName)
 	if err != nil {
 		return false, err
 	}
@@ -35,7 +35,7 @@ func hasCustomHostnameMapping(key string) (bool, error) {
 	return true, nil
 }
 
-func getItem(key string) (string, error) {
+func getCustomDNSMapping(key string) (string, error) {
 	result, err := ddb.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(dynamoDBTable),
 		Key: map[string]*dynamodb.AttributeValue{
@@ -54,7 +54,7 @@ func getItem(key string) (string, error) {
 	}
 
 	if item.Value == "" {
-		fmt.Printf("No item found for key: %s", key)
+		fmt.Printf("No DNS mapping found for instance name: %s\n", key)
 	}
 
 	return item.Value, nil

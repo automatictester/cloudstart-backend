@@ -81,7 +81,7 @@ func terminateInstance(instanceID string) error {
 }
 
 func waitUntilInstanceRunning(instanceID string) error {
-	fmt.Println("Waiting for instance " + instanceID)
+	fmt.Printf("Waiting for instance %s to be running\n", instanceID)
 
 	input := &ec2.DescribeInstancesInput{
 		InstanceIds: []*string{
@@ -97,7 +97,7 @@ func waitUntilInstanceRunning(instanceID string) error {
 }
 
 func waitUntilInstanceStopped(instanceID string) error {
-	fmt.Println("Waiting for instance " + instanceID)
+	fmt.Printf("Waiting for instance %s to stop\n", instanceID)
 
 	input := &ec2.DescribeInstancesInput{
 		InstanceIds: []*string{
@@ -113,7 +113,7 @@ func waitUntilInstanceStopped(instanceID string) error {
 }
 
 func waitUntilInstanceTerminated(instanceID string) error {
-	fmt.Println("Waiting for instance " + instanceID)
+	fmt.Printf("Waiting for instance %s to terminate\n", instanceID)
 
 	input := &ec2.DescribeInstancesInput{
 		InstanceIds: []*string{
