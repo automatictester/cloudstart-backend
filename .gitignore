@@ -4,5 +4,4 @@ target/
 *.iml
 *.zip
 main
-instances-get/instances-get
-instances-patch/instances-patch
+update-dns/update-dns

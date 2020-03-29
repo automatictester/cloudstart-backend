@@ -1,4 +1,4 @@
-module instances-patch
+module update-dns
 
 go 1.13
 
