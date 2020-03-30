@@ -8,6 +8,7 @@ terraform {
 
 provider "aws" {
   region               = "eu-west-2"
+  version              = "2.55"
 }
 
 resource "aws_s3_bucket" "jar" {
@@ -36,7 +37,7 @@ resource "aws_dynamodb_table" "cloudstartstore" {
 resource "aws_lambda_function" "update_dns" {
   function_name                  = "updateDns"
   handler                        = "uk.co.automatictester.cloudstart.backend.instances.patch.UpdateDnsHandler::handleRequest"
-  runtime                        = "java8"
+  runtime                        = "java11"
   s3_bucket                      = "${aws_s3_bucket.jar.bucket}"
   s3_key                         = "${aws_s3_bucket_object.update_dns_jar.key}"
   source_code_hash               = "${base64sha256(file("${path.module}/../target/${var.update_dns_jar_file_name}"))}"
