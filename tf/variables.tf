@@ -1,8 +1,8 @@
-variable "s3_bucket_zip" {
-  default = "automatictester.co.uk-cloudstart-backend-zip"
+variable "s3_bucket_jar" {
+  default = "automatictester.co.uk-cloudstart-backend-jar"
 }
-variable "update_dns_zip_file_name" {
-  default = "cloudstart-backend-update-dns.zip"
+variable "update_dns_jar_file_name" {
+  default = "cloudstart-backend-update-dns.jar"
 }
 variable "region" {
   default = "eu-west-2"

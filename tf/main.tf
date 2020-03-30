@@ -10,16 +10,16 @@ provider "aws" {
   region               = "eu-west-2"
 }
 
-resource "aws_s3_bucket" "zip" {
-  bucket               = "${var.s3_bucket_zip}"
+resource "aws_s3_bucket" "jar" {
+  bucket               = "${var.s3_bucket_jar}"
   acl                  = "private"
 }
 
-resource "aws_s3_bucket_object" "update_dns_zip" {
-  bucket               = "${aws_s3_bucket.zip.bucket}"
-  key                  = "${var.update_dns_zip_file_name}"
-  source               = "${path.module}/../update-dns/${var.update_dns_zip_file_name}"
-  etag                 = "${md5(file("${path.module}/../update-dns/${var.update_dns_zip_file_name}"))}"
+resource "aws_s3_bucket_object" "update_dns_jar" {
+  bucket               = "${aws_s3_bucket.jar.bucket}"
+  key                  = "${var.update_dns_jar_file_name}"
+  source               = "${path.module}/../target/${var.update_dns_jar_file_name}"
+  etag                 = "${md5(file("${path.module}/../target/${var.update_dns_jar_file_name}"))}"
 }
 
 resource "aws_dynamodb_table" "cloudstartstore" {
@@ -35,14 +35,14 @@ resource "aws_dynamodb_table" "cloudstartstore" {
 
 resource "aws_lambda_function" "update_dns" {
   function_name                  = "updateDns"
-  handler                        = "main"
-  runtime                        = "go1.x"
-  s3_bucket                      = "${aws_s3_bucket.zip.bucket}"
-  s3_key                         = "${aws_s3_bucket_object.update_dns_zip.key}"
-  source_code_hash               = "${base64sha256(file("${path.module}/../update-dns/${var.update_dns_zip_file_name}"))}"
+  handler                        = "uk.co.automatictester.cloudstart.backend.instances.patch.UpdateDnsHandler::handleRequest"
+  runtime                        = "java8"
+  s3_bucket                      = "${aws_s3_bucket.jar.bucket}"
+  s3_key                         = "${aws_s3_bucket_object.update_dns_jar.key}"
+  source_code_hash               = "${base64sha256(file("${path.module}/../target/${var.update_dns_jar_file_name}"))}"
   role                           = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${aws_iam_role.cloudstart_lambda_update_dns.name}"
   memory_size                    = "1024"
-  timeout                        = "900"
+  timeout                        = "30"
 }
 
 resource "aws_iam_role" "cloudstart_lambda_update_dns" {

@@ -2,6 +2,3 @@ target/
 .idea/
 .terraform/
 *.iml
-*.zip
-main
-update-dns/update-dns
