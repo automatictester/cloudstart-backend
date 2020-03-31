@@ -63,7 +63,12 @@
                         <filter>
                            <artifact>*:*</artifact>
                            <excludes>
-                              <exclude>META-INF/**</exclude>
+                              <exclude>META-INF/DEPENDENCIES</exclude>
+                              <exclude>META-INF/MANIFEST.MF</exclude>
+                              <exclude>META-INF/LICENSE.txt</exclude>
+                              <exclude>META-INF/NOTICE.txt</exclude>
+                              <exclude>META-INF/NOTICE</exclude>
+                              <exclude>META-INF/LICENSE</exclude>
                            </excludes>
                         </filter>
                      </filters>
