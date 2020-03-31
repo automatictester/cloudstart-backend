@@ -59,19 +59,6 @@
                               implementation="com.github.edwgiz.maven_shade_plugin.log4j2_cache_transformer.PluginsCacheFileTransformer">
                         </transformer>
                      </transformers>
-                     <filters>
-                        <filter>
-                           <artifact>*:*</artifact>
-                           <excludes>
-                              <exclude>META-INF/DEPENDENCIES</exclude>
-                              <exclude>META-INF/MANIFEST.MF</exclude>
-                              <exclude>META-INF/LICENSE.txt</exclude>
-                              <exclude>META-INF/NOTICE.txt</exclude>
-                              <exclude>META-INF/NOTICE</exclude>
-                              <exclude>META-INF/LICENSE</exclude>
-                           </excludes>
-                        </filter>
-                     </filters>
                   </configuration>
                </execution>
             </executions>
