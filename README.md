@@ -1,5 +1,6 @@
 # CloudStart Backend
 
+[![Build Status](https://travis-ci.com/automatictester/cloudstart-backend.svg?branch=master)](https://travis-ci.com/automatictester/cloudstart-backend)
 [![Join the chat at https://gitter.im/automatictester/cloudstart-backend](https://badges.gitter.im/automatictester/cloudstart-backend.svg)](https://gitter.im/automatictester/cloudstart-backend?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ### About
