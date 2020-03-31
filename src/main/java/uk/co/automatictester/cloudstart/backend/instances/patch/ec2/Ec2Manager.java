@@ -1,31 +1,31 @@
-package uk.co.automatictester.cloudstart.backend.instances.patch;
+package uk.co.automatictester.cloudstart.backend.instances.patch.ec2;
 
-import com.amazonaws.services.ec2.AmazonEC2;
-import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.ec2.model.AmazonEC2Exception;
-import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.Tag;
-import lombok.experimental.UtilityClass;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import uk.co.automatictester.cloudstart.backend.instances.patch.route53.Route53Manager;
 
 import java.util.Optional;
 
-@UtilityClass
-public class InstanceManager {
+public class Ec2Manager {
 
-    private static final Logger log = LogManager.getLogger(InstanceManager.class);
-    private static final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
+    private static final Logger log = LogManager.getLogger(Route53Manager.class);
+    private final Ec2Client client;
 
-    public static Optional<String> getInstanceName(String instanceId) {
+    public Ec2Manager(Ec2Client client) {
+        this.client = client;
+    }
+
+    public Optional<String> getInstanceName(String instanceId) {
         Optional<Instance> instance = getInstance(instanceId);
         if (instance.isPresent()) {
             Optional<Tag> nameTag = instance
                     .get()
                     .getTags()
                     .stream()
-                    .filter(t -> t.getKey().equals("Name"))
+                    .filter(t -> t.getKey().equals("Name") && t.getValue() != null && !t.getValue().isBlank())
                     .findAny();
             return nameTag.map(tag -> tag.getValue());
         } else {
@@ -33,26 +33,25 @@ public class InstanceManager {
         }
     }
 
-    public static Optional<String> getPublicIpAddress(String instanceId) {
+    public Optional<String> getPublicIpAddress(String instanceId) {
         Optional<Instance> instance = getInstance(instanceId);
         if (instance.isPresent()) {
-            String publicIpAddress = instance.get().getPublicIpAddress();
+            var publicIpAddress = instance.get().getPublicIpAddress();
             return (publicIpAddress == null) ? Optional.empty() : Optional.of(publicIpAddress);
         } else {
             return Optional.empty();
         }
     }
 
-    private static Optional<Instance> getInstance(String instanceId) {
-        DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceId);
+    private Optional<Instance> getInstance(String instanceId) {
         try {
-            return ec2.describeInstances(describeInstancesRequest)
+            return client.describeInstance(instanceId)
                     .getReservations()
                     .stream()
                     .flatMap(r -> r.getInstances().stream())
                     .findFirst();
         } catch (AmazonEC2Exception e) {
-            log.info("{}", e.getErrorMessage());
+            log.info("Error retrieving instance details: {}", e.getErrorMessage());
             return Optional.empty();
         }
     }
