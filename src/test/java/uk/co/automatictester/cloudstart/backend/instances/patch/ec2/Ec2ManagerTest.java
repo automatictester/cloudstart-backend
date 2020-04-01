@@ -3,6 +3,7 @@ package uk.co.automatictester.cloudstart.backend.instances.patch.ec2;
 import com.amazonaws.services.ec2.model.*;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.Optional;
@@ -11,6 +12,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class Ec2ManagerTest {
 
     private static String instanceId = "i-04cdbf3adda6f58bf";
@@ -28,112 +30,67 @@ public class Ec2ManagerTest {
         reset(client);
     }
 
-    @Test
-    public void testGetInstanceName() {
-        var nameTag = new Tag("Name", "My Instance");
+    @DataProvider(name = "instanceNameTestingInput")
+    public Object[][] getInstanceNameTestingInput() {
+        return new Object[][]{
+                {new Tag("Name", "My Instance"), Optional.of("My Instance")},
+                {new Tag("name", "My Instance"), Optional.empty()},
+                {new Tag("Name", " "), Optional.empty()},
+                {new Tag("Name", null), Optional.empty()}
+        };
+    }
+
+    @Test(dataProvider = "instanceNameTestingInput")
+    public void testGetInstanceName(Tag nameTag, Optional<String> expectedName) {
         var instance = new Instance().withTags(nameTag);
         var describeInstancesResult = new DescribeInstancesResult()
                 .withReservations(new Reservation().withInstances(instance));
         when(client.describeInstance(instanceId)).thenReturn(describeInstancesResult);
         var actualName = ec2Manager.getInstanceName(instanceId);
-        var expectedName = Optional.of(nameTag.getValue());
         assertThat(actualName, equalTo(expectedName));
     }
 
-    @Test
-    public void testGetInstanceNameWithNameTagButWhitespaceValue() {
-        var nameTag = new Tag("Name", " ");
-        var instance = new Instance().withTags(nameTag);
-        var describeInstancesResult = new DescribeInstancesResult()
-                .withReservations(new Reservation().withInstances(instance));
+    @DataProvider(name = "instanceTestingInput")
+    public Object[][] getInstanceTestingInput() {
+        return new Object[][]{
+                {new Reservation().withInstances(new Instance())},
+                {new Reservation()}
+        };
+    }
+
+    @Test(dataProvider = "instanceTestingInput")
+    public void testGetInstanceNameNoInstanceWithSuchName(Reservation reservation) {
+        var describeInstancesResult = new DescribeInstancesResult().withReservations(reservation);
         when(client.describeInstance(instanceId)).thenReturn(describeInstancesResult);
         var actualName = ec2Manager.getInstanceName(instanceId);
         var expectedName = Optional.empty();
         assertThat(actualName, equalTo(expectedName));
     }
 
-    @Test
-    public void testGetInstanceNameWithNameTagButNullValue() {
-        var nameTag = new Tag("Name", null);
-        var instance = new Instance().withTags(nameTag);
-        var describeInstancesResult = new DescribeInstancesResult()
-                .withReservations(new Reservation().withInstances(instance));
-        when(client.describeInstance(instanceId)).thenReturn(describeInstancesResult);
-        var actualName = ec2Manager.getInstanceName(instanceId);
-        var expectedName = Optional.empty();
-        assertThat(actualName, equalTo(expectedName));
+    @DataProvider(name = "publicIpAddressTestingInput")
+    public Object[][] getPublicIpAddressTestingInput() {
+        return new Object[][]{
+                {new Reservation().withInstances(new Instance().withPublicIpAddress("10.0.0.1")), Optional.of("10.0.0.1")},
+                {new Reservation().withInstances(new Instance()), Optional.empty()},
+                {new Reservation(), Optional.empty()}
+        };
     }
 
-    @Test
-    public void testGetInstanceNameWithTagsButNotName() {
-        var nameTag = new Tag("name", "My Instance"); // wrong case, should be 'Name'
-        var instance = new Instance().withTags(nameTag);
+    @Test(dataProvider = "publicIpAddressTestingInput")
+    public void testGetPublicIpAddress(Reservation reservation, Optional<String> ipAddress) {
         var describeInstancesResult = new DescribeInstancesResult()
-                .withReservations(new Reservation().withInstances(instance));
-        when(client.describeInstance(instanceId)).thenReturn(describeInstancesResult);
-        var actualName = ec2Manager.getInstanceName(instanceId);
-        var expectedName = Optional.empty();
-        assertThat(actualName, equalTo(expectedName));
-    }
-
-    @Test
-    public void testGetInstanceNameNoTags() {
-        var instance = new Instance();
-        var describeInstancesResult = new DescribeInstancesResult()
-                .withReservations(new Reservation().withInstances(instance));
-        when(client.describeInstance(instanceId)).thenReturn(describeInstancesResult);
-        var actualName = ec2Manager.getInstanceName(instanceId);
-        var expectedName = Optional.empty();
-        assertThat(actualName, equalTo(expectedName));
-    }
-
-    @Test
-    public void testGetInstanceNameNoInstance() {
-        var describeInstancesResult = new DescribeInstancesResult()
-                .withReservations(new Reservation());
-        when(client.describeInstance(instanceId)).thenReturn(describeInstancesResult);
-        var actualName = ec2Manager.getInstanceName(instanceId);
-        var expectedName = Optional.empty();
-        assertThat(actualName, equalTo(expectedName));
-    }
-
-    @Test
-    public void testGetPublicIpAddress() {
-        var expectedIpAddress = Optional.of("10.0.0.1");
-        var instance = new Instance().withPublicIpAddress(expectedIpAddress.get());
-        var describeInstancesResult = new DescribeInstancesResult()
-                .withReservations(new Reservation().withInstances(instance));
+                .withReservations(reservation);
         when(client.describeInstance(instanceId)).thenReturn(describeInstancesResult);
         var actualIpAddress = ec2Manager.getPublicIpAddress(instanceId);
-        assertThat(actualIpAddress, equalTo(expectedIpAddress));
-    }
-
-    @Test
-    public void testGetPublicIpAddressNoPublicIpAddress() {
-        var expectedIpAddress = Optional.empty();
-        var instance = new Instance();
-        var describeInstancesResult = new DescribeInstancesResult()
-                .withReservations(new Reservation().withInstances(instance));
-        when(client.describeInstance(instanceId)).thenReturn(describeInstancesResult);
-        var actualIpAddress = ec2Manager.getPublicIpAddress(instanceId);
-        assertThat(actualIpAddress, equalTo(expectedIpAddress));
-    }
-
-    @Test
-    public void testGetPublicIpAddressNoInstance() {
-        var expectedIpAddress = Optional.empty();
-        var describeInstancesResult = new DescribeInstancesResult()
-                .withReservations(new Reservation());
-        when(client.describeInstance(instanceId)).thenReturn(describeInstancesResult);
-        var actualIpAddress = ec2Manager.getPublicIpAddress(instanceId);
-        assertThat(actualIpAddress, equalTo(expectedIpAddress));
+        assertThat(actualIpAddress, equalTo(ipAddress));
     }
 
     @Test
     public void testGetPublicIpAddressInvalidInstanceId() {
         var expectedIpAddress = Optional.empty();
-        when(client.describeInstance(instanceId)).thenThrow(new AmazonEC2Exception("Invalid id: \"invalidInstanceId\""));
-        var actualIpAddress = ec2Manager.getPublicIpAddress(instanceId);
+        var invalidInstanceId = "invalidInstanceId";
+        when(client.describeInstance(invalidInstanceId)).thenThrow(AmazonEC2Exception.class);
+        var actualIpAddress = ec2Manager.getPublicIpAddress(invalidInstanceId);
         assertThat(actualIpAddress, equalTo(expectedIpAddress));
     }
 }

@@ -14,7 +14,7 @@ public class UpdateDnsHandler {
     private static final Logger log = LogManager.getLogger(UpdateDnsHandler.class);
     private static final Route53Manager route53Manager = new Route53Manager(new AwsRoute53Client());
     private static final Ec2Manager ec2Manager = new Ec2Manager(new AwsEc2Client());
-    private static final DdbManager ddbManager = new uk.co.automatictester.cloudstart.backend.instances.patch.ddb.DdbManager(new AwsDdbClient());
+    private static final DdbManager ddbManager = new DdbManager(new AwsDdbClient());
 
     public void handleRequest(UpdateDnsRequest request) {
         var instanceId = request.getInstanceId();

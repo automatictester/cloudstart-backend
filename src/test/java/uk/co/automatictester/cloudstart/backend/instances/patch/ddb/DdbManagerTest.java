@@ -5,6 +5,7 @@ import com.amazonaws.services.dynamodbv2.model.GetItemRequest;
 import com.amazonaws.services.dynamodbv2.model.GetItemResult;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.Map;
@@ -14,9 +15,9 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class DdbManagerTest {
 
-    private static String instanceName = "My Instance Name";
     private static DdbClient client;
     private static DdbManager ddbManager;
 
@@ -41,63 +42,47 @@ public class DdbManagerTest {
         assertThat(actualHostname, equalTo(Optional.of(expectedHostedZoneId)));
     }
 
-    @Test
-    public void testGetValue() {
-        var itemRequest = getItemRequest(instanceName);
-        var expectedHostname = "host.example.com";
-        var getItemResult = new GetItemResult().withItem(Map.of("Value", new AttributeValue().withS(expectedHostname)));
-        when(client.getItem(itemRequest)).thenReturn(getItemResult);
-        var actualHostname = ddbManager.getValue(instanceName);
-        assertThat(actualHostname, equalTo(Optional.of(expectedHostname)));
+    @DataProvider(name = "valueTestingInput")
+    public Object[][] getValueTestingInput() {
+        return new Object[][]{
+                {"host.example.com", Optional.of("host.example.com")},
+                {null, Optional.empty()},
+                {" ", Optional.empty()}
+        };
     }
 
-    @Test
-    public void testGetValueButNullValue() {
-        var itemRequest = getItemRequest(instanceName);
-        String expectedHostname = null;
-        var getItemResult = new GetItemResult().withItem(Map.of("Value", new AttributeValue().withS(expectedHostname)));
+    @Test(dataProvider = "valueTestingInput")
+    public void testGetValue(String value, Optional<String> expectedResult) {
+        var key = "My Instance Name";
+        var itemRequest = getItemRequest(key);
+        var getItemResult = new GetItemResult().withItem(Map.of("Value", new AttributeValue().withS(value)));
         when(client.getItem(itemRequest)).thenReturn(getItemResult);
-        var actualHostname = ddbManager.getValue(instanceName);
-        assertThat(actualHostname, equalTo(Optional.empty()));
-    }
-
-    @Test
-    public void testGetValueButBlankValue() {
-        var itemRequest = getItemRequest(instanceName);
-        String expectedHostname = " ";
-        var getItemResult = new GetItemResult().withItem(Map.of("Value", new AttributeValue().withS(expectedHostname)));
-        when(client.getItem(itemRequest)).thenReturn(getItemResult);
-        var actualHostname = ddbManager.getValue(instanceName);
-        assertThat(actualHostname, equalTo(Optional.empty()));
+        var actualResult = ddbManager.getValue(key);
+        assertThat(actualResult, equalTo(expectedResult));
     }
 
     @Test
     public void testGetValueButNoSuchItem() {
-        var itemRequest = getItemRequest(instanceName);
+        var key = "My Instance Name";
+        var itemRequest = getItemRequest(key);
         var getItemResult = new GetItemResult();
         when(client.getItem(itemRequest)).thenReturn(getItemResult);
-        var actualHostname = ddbManager.getValue(instanceName);
-        assertThat(actualHostname, equalTo(Optional.empty()));
+        var actualResult = ddbManager.getValue(key);
+        assertThat(actualResult, equalTo(Optional.empty()));
     }
 
-    @Test
-    public void testGetValueButBlankKey() {
-        var itemRequest = getItemRequest(instanceName);
-        var instanceName = " ";
-        var getItemResult = new GetItemResult();
-        when(client.getItem(itemRequest)).thenReturn(getItemResult);
-        var actualHostname = ddbManager.getValue(instanceName);
-        assertThat(actualHostname, equalTo(Optional.empty()));
+    @DataProvider(name = "keyTestingInput")
+    public Object[][] getKeyTestingInput() {
+        return new Object[][]{
+                {" "},
+                {null}
+        };
     }
 
-    @Test
-    public void testGetValueButNullKey() {
-        var itemRequest = getItemRequest(instanceName);
-        String instanceName = null;
-        var getItemResult = new GetItemResult();
-        when(client.getItem(itemRequest)).thenReturn(getItemResult);
-        var actualHostname = ddbManager.getValue(instanceName);
-        assertThat(actualHostname, equalTo(Optional.empty()));
+    @Test(dataProvider = "keyTestingInput")
+    public void testGetValueButInvalidKey(String key) {
+        var actualResult = ddbManager.getValue(key);
+        assertThat(actualResult, equalTo(Optional.empty()));
     }
 
     private GetItemRequest getItemRequest(String key) {
