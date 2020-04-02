@@ -1,4 +1,4 @@
-package uk.co.automatictester.cloudstart.backend.instances.patch.ec2;
+package uk.co.automatictester.cloudstart.backend.ec2;
 
 import com.amazonaws.services.ec2.model.*;
 import org.testng.annotations.BeforeClass;
@@ -70,7 +70,7 @@ public class Ec2ManagerTest {
     @DataProvider(name = "publicIpAddressTestingInput")
     public Object[][] getPublicIpAddressTestingInput() {
         return new Object[][]{
-                {new Reservation().withInstances(new Instance().withPublicIpAddress("10.0.0.1")), Optional.of("10.0.0.1")},
+                {new Reservation().withInstances(new Instance().withPublicIpAddress("35.176.100.147")), Optional.of("35.176.100.147")},
                 {new Reservation().withInstances(new Instance()), Optional.empty()},
                 {new Reservation(), Optional.empty()}
         };

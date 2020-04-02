@@ -36,7 +36,7 @@ resource "aws_dynamodb_table" "cloudstartstore" {
 
 resource "aws_lambda_function" "update_dns" {
   function_name                  = "updateDns"
-  handler                        = "uk.co.automatictester.cloudstart.backend.instances.patch.UpdateDnsHandler::handleRequest"
+  handler                        = "uk.co.automatictester.cloudstart.backend.UpdateDnsHandler::handleRequest"
   runtime                        = "java11"
   s3_bucket                      = "${aws_s3_bucket.jar.bucket}"
   s3_key                         = "${aws_s3_bucket_object.update_dns_jar.key}"

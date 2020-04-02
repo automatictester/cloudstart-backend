@@ -1,4 +1,4 @@
-package uk.co.automatictester.cloudstart.backend.instances.patch.ec2;
+package uk.co.automatictester.cloudstart.backend.ec2;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;

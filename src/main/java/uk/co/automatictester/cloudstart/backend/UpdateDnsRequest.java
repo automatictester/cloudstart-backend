@@ -1,4 +1,4 @@
-package uk.co.automatictester.cloudstart.backend.instances.patch;
+package uk.co.automatictester.cloudstart.backend;
 
 public class UpdateDnsRequest {
 

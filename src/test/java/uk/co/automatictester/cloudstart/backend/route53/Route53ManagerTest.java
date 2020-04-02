@@ -1,4 +1,4 @@
-package uk.co.automatictester.cloudstart.backend.instances.patch.route53;
+package uk.co.automatictester.cloudstart.backend.route53;
 
 import com.amazonaws.services.route53.model.*;
 import org.testng.annotations.BeforeClass;
@@ -28,7 +28,7 @@ public class Route53ManagerTest {
     @Test
     public void testUpsertDnsEntry() {
         var action = "UPSERT";
-        var ipAddress = "10.0.0.1";
+        var ipAddress = "35.176.100.147";
         var expectedArgument = getExpected(hostedZoneId, action, hostname, ipAddress);
 
         route53Manager.upsertDnsEntry(hostedZoneId, ipAddress, hostname);

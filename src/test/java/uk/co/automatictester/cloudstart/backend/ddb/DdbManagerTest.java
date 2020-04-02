@@ -1,4 +1,4 @@
-package uk.co.automatictester.cloudstart.backend.instances.patch.ddb;
+package uk.co.automatictester.cloudstart.backend.ddb;
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.GetItemRequest;

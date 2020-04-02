@@ -1,4 +1,4 @@
-package uk.co.automatictester.cloudstart.backend.instances.patch.route53;
+package uk.co.automatictester.cloudstart.backend.route53;
 
 import com.amazonaws.services.route53.model.*;
 import org.apache.logging.log4j.LogManager;

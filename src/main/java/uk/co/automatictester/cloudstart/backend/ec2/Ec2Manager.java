@@ -1,11 +1,11 @@
-package uk.co.automatictester.cloudstart.backend.instances.patch.ec2;
+package uk.co.automatictester.cloudstart.backend.ec2;
 
 import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import uk.co.automatictester.cloudstart.backend.instances.patch.route53.Route53Manager;
+import uk.co.automatictester.cloudstart.backend.route53.Route53Manager;
 
 import java.util.Optional;
 
