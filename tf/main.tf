@@ -12,7 +12,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "jar" {
-  bucket               = var.s3_bucket_jar
+  bucket               = var.env_suffix == "" ? var.s3_bucket_jar : replace(var.s3_bucket_jar, "-jar", format("-%s-jar", lower(var.env_suffix)))
   acl                  = "private"
 }
 
@@ -24,7 +24,7 @@ resource "aws_s3_bucket_object" "update_dns_jar" {
 }
 
 resource "aws_dynamodb_table" "cloudstartstore" {
-  name           = "CloudStartStore"
+  name           = "CloudStartStore${var.env_suffix}"
   billing_mode   = "PAY_PER_REQUEST"
   hash_key       = "Key"
 
@@ -35,7 +35,7 @@ resource "aws_dynamodb_table" "cloudstartstore" {
 }
 
 resource "aws_lambda_function" "update_dns" {
-  function_name                  = "updateDns"
+  function_name                  = "updateDns${var.env_suffix}"
   handler                        = "uk.co.automatictester.cloudstart.backend.UpdateDnsHandler::handleRequest"
   runtime                        = "java11"
   s3_bucket                      = aws_s3_bucket.jar.bucket
@@ -44,10 +44,15 @@ resource "aws_lambda_function" "update_dns" {
   role                           = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${aws_iam_role.cloudstart_lambda_update_dns.name}"
   memory_size                    = "1024"
   timeout                        = "30"
+  environment {
+    variables = {
+      DYNAMODB_TABLE = aws_dynamodb_table.cloudstartstore.name
+    }
+  }
 }
 
 resource "aws_iam_role" "cloudstart_lambda_update_dns" {
-  name                 = "CloudStartLambdaUpdateDns"
+  name                 = "CloudStartLambdaUpdateDns${var.env_suffix}"
   assume_role_policy   = file("iam-policy/assume-role-policy.json")
 }
 
@@ -62,7 +67,7 @@ resource "aws_iam_role_policy_attachment" "lambda_update_dns_functional_policy" 
 }
 
 resource "aws_iam_policy" "cloudstart_lambda_update_dns" {
-  name                 = "CloudStartLambdaUpdateDns"
+  name                 = "CloudStartLambdaUpdateDns${var.env_suffix}"
   path                 = "/"
   policy               = <<EOF
 {
@@ -87,7 +92,7 @@ EOF
 }
 
 resource "aws_iam_policy" "cloudstart_mobile_app" {
-  name                 = "CloudStartMobileApp"
+  name                 = "CloudStartMobileApp${var.env_suffix}"
   path                 = "/"
   policy               = <<EOF
 {
@@ -114,4 +119,12 @@ resource "aws_iam_policy" "cloudstart_mobile_app" {
     ]
 }
 EOF
+}
+
+output "region" {
+  value = var.region
+}
+
+output "function" {
+  value = aws_lambda_function.update_dns.function_name
 }

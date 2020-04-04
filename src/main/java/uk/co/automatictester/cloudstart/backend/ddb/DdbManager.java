@@ -10,9 +10,11 @@ import java.util.Optional;
 public class DdbManager {
 
     private final DdbClient client;
+    private final String table;
 
-    public DdbManager(DdbClient client) {
+    public DdbManager(DdbClient client, String table) {
         this.client = client;
+        this.table = table;
     }
 
     public Optional<String> getHostedZoneId() {
@@ -37,7 +39,7 @@ public class DdbManager {
 
     private GetItemRequest getItemRequest(String key) {
         return new GetItemRequest()
-                .withTableName("CloudStartStore")
+                .withTableName(table)
                 .withKey(Map.of("Key", new AttributeValue(key)));
     }
 }

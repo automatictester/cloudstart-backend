@@ -24,7 +24,7 @@ public class DdbManagerTest {
     @BeforeClass
     public void setup() {
         client = mock(DdbClient.class);
-        ddbManager = new DdbManager(client);
+        ddbManager = new DdbManager(client, "CloudStartStore");
     }
 
     @BeforeMethod

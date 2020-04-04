@@ -19,7 +19,7 @@ public class UpdateDnsHandler {
     public UpdateDnsHandler() {
         this.route53Manager = new Route53Manager(new AwsRoute53Client());
         this.ec2Manager = new Ec2Manager(new AwsEc2Client());
-        this.ddbManager = new DdbManager(new AwsDdbClient());
+        this.ddbManager = new DdbManager(new AwsDdbClient(), getDdbTable());
     }
 
     public UpdateDnsHandler(Route53Manager route53Manager, Ec2Manager ec2Manager, DdbManager ddbManager) {
@@ -57,5 +57,14 @@ public class UpdateDnsHandler {
         } else {
             log.info("Hosted zone ID not defined");
         }
+    }
+
+    private String getDdbTable() {
+        var dynamodbTable = "DYNAMODB_TABLE";
+        var table = System.getenv(dynamodbTable);
+        if (table == null) {
+            throw new IllegalStateException("Environment variable '" + dynamodbTable + "' is not defined");
+        }
+        return table;
     }
 }
