@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     bucket             = "automatictester.co.uk-cloudstart-backend-tf-state"
-    key                = "lambda-test-runner.tfstate"
+    key                = "cloudstart-backend.tfstate"
     region             = "eu-west-2"
   }
 }
