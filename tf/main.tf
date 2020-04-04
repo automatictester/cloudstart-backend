@@ -12,15 +12,15 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "jar" {
-  bucket               = "${var.s3_bucket_jar}"
+  bucket               = var.s3_bucket_jar
   acl                  = "private"
 }
 
 resource "aws_s3_bucket_object" "update_dns_jar" {
-  bucket               = "${aws_s3_bucket.jar.bucket}"
-  key                  = "${var.update_dns_jar_file_name}"
+  bucket               = aws_s3_bucket.jar.bucket
+  key                  = var.update_dns_jar_file_name
   source               = "${path.module}/../target/${var.update_dns_jar_file_name}"
-  etag                 = "${md5(file("${path.module}/../target/${var.update_dns_jar_file_name}"))}"
+  etag                 = filemd5("${path.module}/../target/${var.update_dns_jar_file_name}")
 }
 
 resource "aws_dynamodb_table" "cloudstartstore" {
@@ -38,9 +38,9 @@ resource "aws_lambda_function" "update_dns" {
   function_name                  = "updateDns"
   handler                        = "uk.co.automatictester.cloudstart.backend.UpdateDnsHandler::handleRequest"
   runtime                        = "java11"
-  s3_bucket                      = "${aws_s3_bucket.jar.bucket}"
-  s3_key                         = "${aws_s3_bucket_object.update_dns_jar.key}"
-  source_code_hash               = "${base64sha256(file("${path.module}/../target/${var.update_dns_jar_file_name}"))}"
+  s3_bucket                      = aws_s3_bucket.jar.bucket
+  s3_key                         = aws_s3_bucket_object.update_dns_jar.key
+  source_code_hash               = filebase64sha256("${path.module}/../target/${var.update_dns_jar_file_name}")
   role                           = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${aws_iam_role.cloudstart_lambda_update_dns.name}"
   memory_size                    = "1024"
   timeout                        = "30"
@@ -48,17 +48,17 @@ resource "aws_lambda_function" "update_dns" {
 
 resource "aws_iam_role" "cloudstart_lambda_update_dns" {
   name                 = "CloudStartLambdaUpdateDns"
-  assume_role_policy   = "${file("iam-policy/assume-role-policy.json")}"
+  assume_role_policy   = file("iam-policy/assume-role-policy.json")
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_update_dns_cloudwatch_policy" {
-  role                 = "${aws_iam_role.cloudstart_lambda_update_dns.name}"
+  role                 = aws_iam_role.cloudstart_lambda_update_dns.name
   policy_arn           = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_update_dns_functional_policy" {
-  role                 = "${aws_iam_role.cloudstart_lambda_update_dns.name}"
-  policy_arn           = "${aws_iam_policy.cloudstart_lambda_update_dns.arn}"
+  role                 = aws_iam_role.cloudstart_lambda_update_dns.name
+  policy_arn           = aws_iam_policy.cloudstart_lambda_update_dns.arn
 }
 
 resource "aws_iam_policy" "cloudstart_lambda_update_dns" {
