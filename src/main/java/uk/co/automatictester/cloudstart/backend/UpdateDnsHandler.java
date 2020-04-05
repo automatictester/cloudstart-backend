@@ -29,33 +29,35 @@ public class UpdateDnsHandler {
     }
 
     public void handleRequest(UpdateDnsRequest request) {
-        var instanceId = request.getInstanceId();
-        var action = request.getAction();
         var hostedZoneId = ddbManager.getHostedZoneId();
 
-        if (hostedZoneId.isPresent()) {
-            switch (action.toLowerCase()) {
-                case ("upsert"):
-                    ec2Manager.getInstanceName(instanceId).ifPresent((instanceName) -> {
-                        ddbManager.getValue(instanceName).ifPresent((hostname) -> {
-                            ec2Manager.getPublicIpAddress(instanceId).ifPresent((ipAddress) -> {
-                                route53Manager.upsertDnsEntry(hostedZoneId.get(), ipAddress, hostname);
-                            });
+        if (hostedZoneId.isEmpty()) {
+            log.error("Hosted zone ID not set");
+            return;
+        } else if (!RequestValidator.isValid(request)) {
+            return;
+        }
+
+        var instanceId = request.getInstanceId();
+        var action = request.getAction();
+
+        switch (action.toLowerCase()) {
+            case ("upsert"):
+                ec2Manager.getInstanceName(instanceId).ifPresent((instanceName) -> {
+                    ddbManager.getValue(instanceName).ifPresent((hostname) -> {
+                        ec2Manager.getPublicIpAddress(instanceId).ifPresent((ipAddress) -> {
+                            route53Manager.upsertDnsEntry(hostedZoneId.get(), ipAddress, hostname);
                         });
                     });
-                    break;
-                case ("delete"):
-                    ec2Manager.getInstanceName(instanceId).ifPresent((instanceName) -> {
-                        ddbManager.getValue(instanceName).ifPresent(hostname -> {
-                            route53Manager.deleteDnsEntry(hostedZoneId.get(), hostname);
-                        });
+                });
+                break;
+            case ("delete"):
+                ec2Manager.getInstanceName(instanceId).ifPresent((instanceName) -> {
+                    ddbManager.getValue(instanceName).ifPresent(hostname -> {
+                        route53Manager.deleteDnsEntry(hostedZoneId.get(), hostname);
                     });
-                    break;
-                default:
-                    log.info("Unknown action: {}", action);
-            }
-        } else {
-            log.info("Hosted zone ID not defined");
+                });
+                break;
         }
     }
 
@@ -63,7 +65,7 @@ public class UpdateDnsHandler {
         var dynamodbTable = "DYNAMODB_TABLE";
         var table = System.getenv(dynamodbTable);
         if (table == null) {
-            throw new IllegalStateException("Environment variable '" + dynamodbTable + "' is not defined");
+            throw new IllegalStateException("Environment variable '" + dynamodbTable + "' is not set");
         }
         return table;
     }

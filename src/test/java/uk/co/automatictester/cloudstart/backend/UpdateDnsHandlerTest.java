@@ -1,6 +1,6 @@
 package uk.co.automatictester.cloudstart.backend;
 
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import uk.co.automatictester.cloudstart.backend.ddb.DdbManager;
 import uk.co.automatictester.cloudstart.backend.ec2.Ec2Manager;
@@ -22,7 +22,7 @@ public class UpdateDnsHandlerTest {
     private Ec2Manager ec2Manager;
     private Route53Manager route53Manager;
 
-    @BeforeClass
+    @BeforeMethod
     public void setup() {
         ddbManager = mock(DdbManager.class);
         when(ddbManager.getHostedZoneId()).thenReturn(Optional.of(hostedZoneId));
@@ -37,7 +37,7 @@ public class UpdateDnsHandlerTest {
 
     @Test
     public void testHandleRequestUpsert() {
-        UpdateDnsRequest request = new UpdateDnsRequest();
+        var request = new UpdateDnsRequest();
         request.setInstanceId(instanceId);
         request.setAction("upsert");
 
@@ -48,12 +48,38 @@ public class UpdateDnsHandlerTest {
 
     @Test
     public void testHandleRequestDelete() {
-        UpdateDnsRequest request = new UpdateDnsRequest();
+        var request = new UpdateDnsRequest();
         request.setInstanceId(instanceId);
         request.setAction("delete");
 
         new UpdateDnsHandler(route53Manager, ec2Manager, ddbManager).handleRequest(request);
 
         verify(route53Manager, times(1)).deleteDnsEntry(hostedZoneId, hostname);
+    }
+
+    @Test
+    public void testHostedZoneIdNotSet() {
+        var request = new UpdateDnsRequest();
+        request.setInstanceId(instanceId);
+        request.setAction("upsert");
+
+        when(ddbManager.getHostedZoneId()).thenReturn(Optional.empty());
+
+        new UpdateDnsHandler(route53Manager, ec2Manager, ddbManager).handleRequest(request);
+
+        verify(route53Manager, times(0)).upsertDnsEntry(anyString(), anyString(), anyString());
+        verify(route53Manager, times(0)).deleteDnsEntry(anyString(), anyString());
+    }
+
+    @Test
+    public void testInvalidRequest() {
+        var request = new UpdateDnsRequest();
+        request.setInstanceId(null);
+        request.setAction(null);
+
+        new UpdateDnsHandler(route53Manager, ec2Manager, ddbManager).handleRequest(request);
+
+        verify(route53Manager, times(0)).upsertDnsEntry(anyString(), anyString(), anyString());
+        verify(route53Manager, times(0)).deleteDnsEntry(anyString(), anyString());
     }
 }

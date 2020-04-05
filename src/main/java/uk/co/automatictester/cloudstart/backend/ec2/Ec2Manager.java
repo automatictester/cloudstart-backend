@@ -51,7 +51,7 @@ public class Ec2Manager {
                     .flatMap(r -> r.getInstances().stream())
                     .findFirst();
         } catch (AmazonEC2Exception e) {
-            log.info("Error retrieving instance details: {}", e.getErrorMessage());
+            log.error("Error retrieving instance details: {}", e.getErrorMessage());
             return Optional.empty();
         }
     }
