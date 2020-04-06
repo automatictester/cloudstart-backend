@@ -29,7 +29,7 @@ public class Ec2Manager {
                     .findAny();
             return nameTag.map(tag -> tag.getValue());
         } else {
-            return Optional.empty();
+            throw new RuntimeException("Instance with instanceId '" + instanceId + "' does not exist");
         }
     }
 

@@ -50,16 +50,19 @@ public class Ec2ManagerTest {
         assertThat(actualName, equalTo(expectedName));
     }
 
-    @DataProvider(name = "instanceTestingInput")
-    public Object[][] getInstanceTestingInput() {
-        return new Object[][]{
-                {new Reservation().withInstances(new Instance())},
-                {new Reservation()}
-        };
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testGetInstanceNameNoInstanceWithGivenInstanceId() {
+        var reservation = new Reservation();
+        var describeInstancesResult = new DescribeInstancesResult().withReservations(reservation);
+        when(client.describeInstance(instanceId)).thenReturn(describeInstancesResult);
+        var actualName = ec2Manager.getInstanceName(instanceId);
+        var expectedName = Optional.empty();
+        assertThat(actualName, equalTo(expectedName));
     }
 
-    @Test(dataProvider = "instanceTestingInput")
-    public void testGetInstanceNameNoInstanceWithSuchName(Reservation reservation) {
+    @Test
+    public void testGetInstanceNameNoName() {
+        var reservation = new Reservation().withInstances(new Instance());
         var describeInstancesResult = new DescribeInstancesResult().withReservations(reservation);
         when(client.describeInstance(instanceId)).thenReturn(describeInstancesResult);
         var actualName = ec2Manager.getInstanceName(instanceId);

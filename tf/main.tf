@@ -128,3 +128,7 @@ output "region" {
 output "function" {
   value = aws_lambda_function.update_dns.function_name
 }
+
+output "table" {
+  value = aws_dynamodb_table.cloudstartstore.name
+}
