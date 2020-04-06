@@ -1,6 +1,7 @@
 package terratest
 
 import (
+	"encoding/json"
 	"github.com/gruntwork-io/terratest/modules/aws"
 	"github.com/gruntwork-io/terratest/modules/logger"
 	"github.com/gruntwork-io/terratest/modules/shell"
@@ -39,13 +40,15 @@ func TestUpdateDnsLambda(t *testing.T) {
 	function := terraform.Output(t, terraformOptions, "function")
 
 	logger.Log(t, "Invoking Lambda...")
-	_, err := aws.InvokeFunctionE(t, region, function, UpdateDnsRequest{InstanceId: "i-09dc014d370bc3cc6", Action: "undefined"})
-	if err != nil {
-		functionError, _ := err.(*aws.FunctionError)
-		errorMessage := string(functionError.Payload)
-		assert.Nil(t, err, errorMessage)
-	}
+	_, err := aws.InvokeFunctionE(t, region, function, UpdateDnsRequest{InstanceId: "i-09dc014d370bc3cc6", Action: "upsert"})
 	logger.Log(t, "Invoking Lambda done!")
+
+	functionError, _ := err.(*aws.FunctionError)
+	errorPayload := string(functionError.Payload)
+	var result map[string]interface{}
+	_ = json.Unmarshal([]byte(errorPayload), &result)
+	errorMessage := result["errorMessage"]
+	assert.Equal(t, "Hosted zone ID not set", errorMessage)
 }
 
 type UpdateDnsRequest struct {

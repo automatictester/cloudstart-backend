@@ -17,8 +17,9 @@ public class DdbManager {
         this.table = table;
     }
 
-    public Optional<String> getHostedZoneId() {
-        return getValue("HOSTED_ZONE_ID");
+    public String getHostedZoneId() {
+        var hostedZoneId = getValue("HOSTED_ZONE_ID");
+        return hostedZoneId.orElseThrow(() -> new RuntimeException("Hosted zone ID not set"));
     }
 
     public Optional<String> getValue(String key) {

@@ -20,4 +20,9 @@ public class UpdateDnsRequest {
     public void setAction(String action) {
         this.action = action;
     }
+
+    @Override
+    public String toString() {
+        return String.format("UpdateDnsRequest[instanceId=%s, action=%s]", instanceId, action);
+    }
 }

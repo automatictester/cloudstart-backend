@@ -15,12 +15,10 @@ public class Route53Manager {
     }
 
     public void upsertDnsEntry(String hostedZoneId, String ipAddress, String hostname) {
-        log.info("Updating instance DNS entry '{}' -> '{}'", hostname, ipAddress);
         upsert(hostedZoneId, ipAddress, hostname);
     }
 
     public void deleteDnsEntry(String hostedZoneId, String hostname) {
-        log.info("Deleting instance DNS entry '{}'", hostname);
         upsert(hostedZoneId, FAKE_IP_ADDRESS, hostname);
         ResourceRecordSet resourceRecordSet = getResourceRecordSet(FAKE_IP_ADDRESS, hostname);
         Change change = getChange("DELETE", resourceRecordSet);

@@ -85,12 +85,10 @@ public class Ec2ManagerTest {
         assertThat(actualIpAddress, equalTo(ipAddress));
     }
 
-    @Test
+    @Test(expectedExceptions = RuntimeException.class)
     public void testGetPublicIpAddressInvalidInstanceId() {
-        var expectedIpAddress = Optional.empty();
         var invalidInstanceId = "invalidInstanceId";
         when(client.describeInstance(invalidInstanceId)).thenThrow(AmazonEC2Exception.class);
-        var actualIpAddress = ec2Manager.getPublicIpAddress(invalidInstanceId);
-        assertThat(actualIpAddress, equalTo(expectedIpAddress));
+        ec2Manager.getPublicIpAddress(invalidInstanceId);
     }
 }

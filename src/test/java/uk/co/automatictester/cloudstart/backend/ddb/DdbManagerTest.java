@@ -39,7 +39,15 @@ public class DdbManagerTest {
         var getItemResult = new GetItemResult().withItem(Map.of("Value", new AttributeValue().withS(expectedHostedZoneId)));
         when(client.getItem(hostedZoneId)).thenReturn(getItemResult);
         var actualHostname = ddbManager.getHostedZoneId();
-        assertThat(actualHostname, equalTo(Optional.of(expectedHostedZoneId)));
+        assertThat(actualHostname, equalTo(expectedHostedZoneId));
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testGetHostedZoneIdException() {
+        var hostedZoneId = getItemRequest("HOSTED_ZONE_ID");
+        var getItemResult = new GetItemResult();
+        when(client.getItem(hostedZoneId)).thenReturn(getItemResult);
+        ddbManager.getHostedZoneId();
     }
 
     @DataProvider(name = "valueTestingInput")

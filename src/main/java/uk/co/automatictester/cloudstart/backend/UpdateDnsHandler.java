@@ -9,6 +9,8 @@ import uk.co.automatictester.cloudstart.backend.ec2.Ec2Manager;
 import uk.co.automatictester.cloudstart.backend.route53.AwsRoute53Client;
 import uk.co.automatictester.cloudstart.backend.route53.Route53Manager;
 
+import java.util.Optional;
+
 public class UpdateDnsHandler {
 
     private static final Logger log = LogManager.getLogger(UpdateDnsHandler.class);
@@ -31,41 +33,53 @@ public class UpdateDnsHandler {
     public void handleRequest(UpdateDnsRequest request) {
         var hostedZoneId = ddbManager.getHostedZoneId();
 
-        if (hostedZoneId.isEmpty()) {
-            log.error("Hosted zone ID not set");
-            return;
-        } else if (!RequestValidator.isValid(request)) {
-            return;
+        if (!RequestValidator.isValid(request)) {
+            throw new RuntimeException("Invalid request: " + request);
         }
 
         var instanceId = request.getInstanceId();
-        var action = request.getAction();
+        var action = request.getAction().toLowerCase();
 
-        switch (action.toLowerCase()) {
-            case ("upsert"):
-                ec2Manager.getInstanceName(instanceId).ifPresent((instanceName) -> {
-                    ddbManager.getValue(instanceName).ifPresent((hostname) -> {
-                        ec2Manager.getPublicIpAddress(instanceId).ifPresent((ipAddress) -> {
-                            route53Manager.upsertDnsEntry(hostedZoneId.get(), ipAddress, hostname);
-                        });
-                    });
-                });
-                break;
-            case ("delete"):
-                ec2Manager.getInstanceName(instanceId).ifPresent((instanceName) -> {
-                    ddbManager.getValue(instanceName).ifPresent(hostname -> {
-                        route53Manager.deleteDnsEntry(hostedZoneId.get(), hostname);
-                    });
-                });
-                break;
+        if (action.equals("upsert")) {
+            Optional<String> instanceName = ec2Manager.getInstanceName(instanceId);
+            if (instanceName.isPresent()) {
+                Optional<String> hostname = ddbManager.getValue(instanceName.get());
+                if (hostname.isPresent()) {
+                    Optional<String> ipAddress = ec2Manager.getPublicIpAddress(instanceId);
+                    if (ipAddress.isPresent()) {
+                        log.info("Updating instance DNS entry '{}' -> '{}'", hostname.get(), ipAddress.get());
+                        route53Manager.upsertDnsEntry(hostedZoneId, ipAddress.get(), hostname.get());
+                    } else {
+                        log.info("Instance '{}' has name '{}' and DNS mapping '{}' but no public IP address",
+                                instanceId, instanceName.get(), hostname.get());
+                    }
+                } else {
+                    log.info("Instance '{}' has name '{}' but no DNS mapping", instanceId, instanceName.get());
+                }
+            } else {
+                log.info("Instance '{}' has no name", instanceId);
+            }
+        } else if (action.equals("delete")) {
+            Optional<String> instanceName = ec2Manager.getInstanceName(instanceId);
+            if (instanceName.isPresent()) {
+                Optional<String> hostname = ddbManager.getValue(instanceName.get());
+                if (hostname.isPresent()) {
+                    log.info("Deleting instance DNS entry '{}'", hostname.get());
+                    route53Manager.deleteDnsEntry(hostedZoneId, hostname.get());
+                } else {
+                    log.info("Instance '{}' has name '{}' but no DNS mapping", instanceId, instanceName.get());
+                }
+            } else {
+                log.info("Instance '{}' has no name", instanceId);
+            }
         }
     }
 
     private String getDdbTable() {
-        var dynamodbTable = "DYNAMODB_TABLE";
-        var table = System.getenv(dynamodbTable);
+        var ddbTable = "DYNAMODB_TABLE";
+        var table = System.getenv(ddbTable);
         if (table == null) {
-            throw new IllegalStateException("Environment variable '" + dynamodbTable + "' is not set");
+            throw new RuntimeException("Environment variable '" + ddbTable + "' is not set");
         }
         return table;
     }

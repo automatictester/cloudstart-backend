@@ -25,7 +25,7 @@ public class UpdateDnsHandlerTest {
     @BeforeMethod
     public void setup() {
         ddbManager = mock(DdbManager.class);
-        when(ddbManager.getHostedZoneId()).thenReturn(Optional.of(hostedZoneId));
+        when(ddbManager.getHostedZoneId()).thenReturn(hostedZoneId);
         when(ddbManager.getValue(instanceName)).thenReturn(Optional.of(hostname));
 
         ec2Manager = mock(Ec2Manager.class);
@@ -57,29 +57,12 @@ public class UpdateDnsHandlerTest {
         verify(route53Manager, times(1)).deleteDnsEntry(hostedZoneId, hostname);
     }
 
-    @Test
-    public void testHostedZoneIdNotSet() {
-        var request = new UpdateDnsRequest();
-        request.setInstanceId(instanceId);
-        request.setAction("upsert");
-
-        when(ddbManager.getHostedZoneId()).thenReturn(Optional.empty());
-
-        new UpdateDnsHandler(route53Manager, ec2Manager, ddbManager).handleRequest(request);
-
-        verify(route53Manager, times(0)).upsertDnsEntry(anyString(), anyString(), anyString());
-        verify(route53Manager, times(0)).deleteDnsEntry(anyString(), anyString());
-    }
-
-    @Test
+    @Test(expectedExceptions = RuntimeException.class)
     public void testInvalidRequest() {
         var request = new UpdateDnsRequest();
         request.setInstanceId(null);
         request.setAction(null);
 
         new UpdateDnsHandler(route53Manager, ec2Manager, ddbManager).handleRequest(request);
-
-        verify(route53Manager, times(0)).upsertDnsEntry(anyString(), anyString(), anyString());
-        verify(route53Manager, times(0)).deleteDnsEntry(anyString(), anyString());
     }
 }
